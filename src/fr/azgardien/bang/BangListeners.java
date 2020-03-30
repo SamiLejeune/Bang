@@ -27,7 +27,7 @@ public class BangListeners implements Listener {
 	public void onJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 		player.getInventory().clear();
-		event.setJoinMessage("§a"+player.getName() + " s'est connecté !");
+		event.setJoinMessage("ï¿½a"+player.getName() + " s'est connectï¿½ !");
 	}
 	
 	
@@ -39,7 +39,7 @@ public class BangListeners implements Listener {
 		
 		if(current == null) return;
 
-		if (current.getItemMeta().getDisplayName().equalsIgnoreCase("§bInteraction")) {
+		if (current.getItemMeta().getDisplayName().equalsIgnoreCase("ï¿½bInteraction")) {
 			Inventory interaction = this.controller.playerInventory(this.controller.getJoueur(player));
 			player.openInventory(interaction);
 		}
@@ -53,12 +53,12 @@ public class BangListeners implements Listener {
 		
 		if(current == null) return;
 		
-		if (current.getItemMeta().getDisplayName().equalsIgnoreCase("§bInteraction")) {
+		if (current.getItemMeta().getDisplayName().equalsIgnoreCase("ï¿½bInteraction")) {
 			Inventory interaction = this.controller.playerInventory(this.controller.getJoueur(player));
 			player.openInventory(interaction);
 		}
 		
-		if (inv.getName().equalsIgnoreCase("§8Interaction")) {
+		if (inv.getName().equalsIgnoreCase("ï¿½8Interaction")) {
 			event.setCancelled(true);
 		}
 		
