@@ -1,0 +1,12 @@
+name: Bang
+version: 1.0
+author: Az_Gardien
+main: fr.azgardien.bang.Main
+commands:
+  start:
+    description: Debute la partie de Bang
+    permission: admin.use
+  choix:
+    description: Choix du personnage
+  personnages:
+    description: Connaitre les personnages des joueurs
