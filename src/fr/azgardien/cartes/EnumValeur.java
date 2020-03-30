@@ -1,6 +1,6 @@
 public enum Valeur 
 {
-    1,
+    A,
     2,
     3,
     4,
@@ -10,7 +10,7 @@ public enum Valeur
     8,
     9,
     10,
-    Valet,
-    Dame,
-    Roi;
+    J,
+    Q,
+    K;
 }
