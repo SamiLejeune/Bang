@@ -1,39 +1,57 @@
 package fr.azgardien.cartes;
 
-public abstract class Carte 
+import org.bukkit.inventory.ItemStack;
+
+import fr.azgardien.bang.Joueur;
+
+public abstract class Carte  implements ContreAttaque
 {
-    private Valeur val;
+	@Override
+	public String toString() {
+		return "Carte [ nom=" + nom + "]";
+	}
+
+
+	private String val;
 	private Couleur couleur;
 	private String description;
 	private String nom;
-}
+	private int distance;
 
-public Carte(Valeur valeur, Couleur coul, String desc, String nom)
-{
-    this.val = valeur;
-    this.couleur = coul;
-    this.description = desc;
-    this.nom = nom;
-}
 
-public int getNum()
-{
-    return this.num;
-}
 
-public int getCouleur()
-{
-    return this.couleur;
-}
+	public Carte(String valeur, Couleur coul, String desc, String nom)
+	{
+		this.val = valeur;
+		this.couleur = coul;
+		this.description = desc;
+		this.nom = nom;
+		this.distance = 0;
+	}
 
-public int getDesc()
-{
-    return this.description;
-}
+	public String getNom()
+	{
+		return this.nom;
+	}
+	public int getDistance() {
+		return distance;
+	}
+	
+	public void ameliorerDistance(int distance) {
+		this.distance = distance;
+	}
 
-public int getNom()
-{
-    return this.nom;
-}
+	public Couleur getCouleur()
+	{
+		return this.couleur;
+	}
 
-public abstract void appliquerEffet(Joueur target){}
+	public String getDesc()
+	{
+		return this.description;
+	}
+
+
+	public abstract void appliquerEffet(Joueur source, Joueur target);
+	public abstract ItemStack representation();
+}

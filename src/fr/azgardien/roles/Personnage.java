@@ -1,6 +1,10 @@
 package fr.azgardien.roles;
 
+import java.util.ArrayList;
+
+import fr.azgardien.bang.BangController;
 import fr.azgardien.bang.Joueur;
+import fr.azgardien.cartes.Carte;
 
 public abstract class Personnage {
 
@@ -8,7 +12,14 @@ public abstract class Personnage {
 	private String nom;
 	private String description;
 	private int rangeLunette, distance;
+	private int limiteBang;
 	
+	public int getLimiteBang() {
+		return limiteBang;
+	}
+
+
+
 	public int getRangeLunette() {
 		return rangeLunette;
 	}
@@ -33,8 +44,8 @@ public abstract class Personnage {
 		this.description = description;
 		this.rangeLunette = rangeLunette;
 		this.distance = distance;
+		this.limiteBang = 1;
 	}
-	
 	
 	public String getNom() {
 		return nom;
@@ -52,6 +63,14 @@ public abstract class Personnage {
 	
 	public abstract String touche(Joueur victime , Joueur tireur);
 	public abstract String pioche();
+	public ArrayList<Carte> piocheTour() {
+		ArrayList<Carte> pioche = new ArrayList<Carte>();
+		for (int i = 0 ; i < 2 ; i++) {
+			Carte c = BangController.getInstance().getCarte();
+			pioche.add(c);
+		}
+		return pioche;
+	}
 	public abstract String tire(Joueur source , Joueur cible);
 	public abstract String mainVide();
 	public abstract String joueurMort(Joueur recup, Joueur mort);

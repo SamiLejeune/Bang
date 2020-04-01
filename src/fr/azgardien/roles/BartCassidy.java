@@ -1,5 +1,8 @@
 package fr.azgardien.roles;
 
+import org.bukkit.Bukkit;
+
+import fr.azgardien.bang.BangController;
 import fr.azgardien.bang.Joueur;
 
 public class BartCassidy extends Personnage {
@@ -13,8 +16,10 @@ public class BartCassidy extends Personnage {
 
 	@Override
 	public String touche(Joueur victime, Joueur tireur) {
-		// TODO Auto-generated method stub
-		return null;
+		BangController.getInstance().getPlayerServer(victime).sendMessage("§6Vous récupérez une carte");
+		victime.pioche(BangController.getInstance().getCarte());
+		victime.damage(1);
+		return "§b" + victime.getPseudo() + " est touché, il pioche une carte et perd un point de vie";
 	}
 
 	@Override
@@ -40,5 +45,6 @@ public class BartCassidy extends Personnage {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
 
 }

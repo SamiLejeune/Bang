@@ -27,7 +27,6 @@ public class PersonnageFactory {
 				while((text = in.readLine())!= null) {
 					Personnage p = createPersonnage(text);
 					personnages.add(p);
-
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

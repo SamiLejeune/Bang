@@ -8,11 +8,14 @@ public class Main extends JavaPlugin {
 	public void onEnable() {
 		System.out.println("Plugin Bang en route");
 		BangController controller = BangController.getInstance();
-		System.out.println(controller);
 		getCommand("start").setExecutor(controller);
 		getCommand("choix").setExecutor(controller);
 		getCommand("personnages").setExecutor(controller);
-		getServer().getPluginManager().registerEvents(new BangListeners(controller), this);
+		getServer().getPluginManager().registerEvents(new BangListeners(controller,this), this);
 		super.onEnable();
+	}
+	@Override
+	public void onDisable() {
+		BangController.getInstance().tpFinish();
 	}
 }

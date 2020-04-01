@@ -14,8 +14,8 @@ public class SlabLeFlingueur extends Personnage {
 
 	@Override
 	public String touche(Joueur victime, Joueur tireur) {
-		// TODO Auto-generated method stub
-		return null;
+		victime.damage(1);
+		return "§b" + victime.getPseudo() +" est touché, il perd un point de vie";
 	}
 
 	@Override
@@ -41,5 +41,6 @@ public class SlabLeFlingueur extends Personnage {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
 
 }
