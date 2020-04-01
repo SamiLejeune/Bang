@@ -7,12 +7,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class MortTask extends BukkitRunnable {
 
-	private final JavaPlugin plugin;
-	
-	public MortTask(JavaPlugin plugin) {
-		this.plugin = plugin;
-	}
-	
 	@Override
 	public void run() {
 		

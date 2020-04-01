@@ -36,6 +36,7 @@ public class Bang extends Carte
 			Inventory action = controller.actionInventory(source, target, getNom());
 			cible.openInventory(action);
 		} else if (target.finAction == true && target.contreAction == false) {
+			target.defausse(this);
 			target.bang(source);
 		}
 		

@@ -1,11 +1,13 @@
 package fr.azgardien.cartes;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import fr.azgardien.bang.BangController;
 import fr.azgardien.bang.Joueur;
 
 public class Saloon extends Carte
@@ -23,7 +25,14 @@ public class Saloon extends Carte
     @Override
     public void appliquerEffet(Joueur source,Joueur target)
     {
-        //TODO Auto-generated method stub
+    	Bukkit.broadcastMessage("§a"+source.getPseudo()+" pose un saloon");
+        for (Joueur j : BangController.getInstance().getPlayers()) {
+        	if (j.biereSaloon()) {
+        		Bukkit.broadcastMessage("§a"+j.getPseudo() + " boit une bière pour regagner une vie");
+        	} else {
+        		BangController.getInstance().getPlayerServer(j).sendMessage("§cVous êtes au max de votre vie");
+        	}
+        }
     }
 
 	@Override

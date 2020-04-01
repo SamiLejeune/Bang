@@ -13,16 +13,19 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.Vector;
 
 import fr.azgardien.cartes.Bang;
 import fr.azgardien.cartes.Biere;
 import fr.azgardien.cartes.Carte;
+import fr.azgardien.cartes.Lunette;
 import fr.azgardien.cartes.Rate;
 import fr.azgardien.roles.Personnage;
 
@@ -48,7 +51,7 @@ public class BangListeners implements Listener {
 		Action action = event.getAction();
 		ItemStack current = event.getItem();
 		if(current == null) return;
-
+		if (BangController.getInstance().getPlayers() == null) return;
 		if (current.getType() == Material.COMPASS) {
 			if (current.getItemMeta().getDisplayName().equalsIgnoreCase("§bInteraction")) {
 				Inventory interaction = this.controller.playerInventory(this.controller.getJoueur(player));
@@ -60,8 +63,15 @@ public class BangListeners implements Listener {
 				Joueur source = BangController.getInstance().getJoueur(player);
 				Joueur cible = BangController.getInstance().getJoueur(getTargetPlayer(player));
 				if (cible != null) {
-					c.appliquerEffet(source,cible);
+					if (c.getClass() == Bang.class) {
+						if (BangController.getInstance().reach(source, cible)) {
+							c.appliquerEffet(source,cible);				
+						} else {
+							player.sendMessage("§cVous n'avez pas la portée nécessaire pour Bang ce joueur");
+						}
+					}
 					player.getInventory().remove(current);
+					
 				}	
 			}
 		}
@@ -96,7 +106,8 @@ public class BangListeners implements Listener {
 		ItemStack current = event.getCurrentItem();
 		
 		if(current == null) return;
-	
+		if (BangController.getInstance().getPlayers() == null) return;
+		
 		Joueur joueur = BangController.getInstance().getJoueur(player);
 		if (BangController.getInstance().currentJoueur != joueur && !inv.getName().equalsIgnoreCase("§8Action")) {
 			player.sendMessage("§cCe n'est pas votre tour de jouer");
@@ -138,6 +149,7 @@ public class BangListeners implements Listener {
 		}
 		
 		if (inv.getName().equalsIgnoreCase("§8Interaction")) {
+			
 			if (type == Material.PAPER || type == Material.DEAD_BUSH || type == Material.STAINED_GLASS_PANE) {
 				//Nothing
 			} else if (type == Material.ENDER_PORTAL_FRAME) {
@@ -183,15 +195,17 @@ public class BangListeners implements Listener {
 					} else {
 						c.appliquerEffet(BangController.getInstance().getJoueur(player),null);
 					}
-					if (BangController.getInstance().estArme(c) || c.getClass() == Biere.class) {
+					if (BangController.getInstance().estArme(c) || c.getClass() == Biere.class || c.getClass() == Lunette.class) {
 						
 					} else {
 						if (!BangController.getInstance().isTargettableCarte(c)) {
 							player.closeInventory();
-						}
-						joueur.defausse(c);
-						if (!BangController.getInstance().isTargettableCarte(c)) {
+							joueur.defausse(c);
 							player.openInventory(BangController.getInstance().playerInventory(joueur));
+						} else {
+							if (c.getClass() == Bang.class) {
+								joueur.defausse(c);
+							}
 						}
 						
 					}
@@ -226,16 +240,18 @@ public class BangListeners implements Listener {
 		Player player = (Player) event.getPlayer();
 		Inventory inv = event.getInventory();
 		Joueur j = BangController.getInstance().getJoueur(player);
-		if (inv.getName().equalsIgnoreCase("§8Action") && !j.finAction ) {
-			j.finAction = true;
-			j.contreAction = false;
-			j.actionRecu.appliquerEffet(j.sourceAction, j);
-			j.contreAction = false;
-			j.finAction = false;
-			j.currentAction = null;
-			j.sourceAction = null;
-			j.joueurAttaque = null;
-		}
+		if (j != null) {
+			if (inv.getName().equalsIgnoreCase("§8Action") && !j.finAction ) {
+				j.finAction = true;
+				j.contreAction = false;
+				j.actionRecu.appliquerEffet(j.sourceAction, j);
+				j.contreAction = false;
+				j.finAction = false;
+				j.currentAction = null;
+				j.sourceAction = null;
+				j.joueurAttaque = null;
+			}
+		}	
 	}
 	
     public static Player getTargetPlayer(final Player player) {
@@ -263,6 +279,19 @@ public class BangListeners implements Listener {
             }
         }
         return target;
+    }
+    
+  
+    
+    @EventHandler
+    public void disconnect(PlayerQuitEvent event) {
+    	Player player = event.getPlayer();
+    	
+    	if (BangController.getInstance().getJoueur(player) != null && BangController.getInstance().startTask) {
+    		Bukkit.broadcastMessage("§c"+player.getName() + " a quitté la partie ! Fin du jeu");
+    		BangController.getInstance().startTask = false;
+    		BangController.getInstance().tpFinish();
+    	}
     }
 	
 }

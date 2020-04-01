@@ -6,9 +6,12 @@ import java.util.Arrays;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import fr.azgardien.cartes.Carabine;
 import fr.azgardien.cartes.Carte;
+import fr.azgardien.cartes.Couleur;
+import fr.azgardien.cartes.Lunette;
 import fr.azgardien.cartes.Remington;
 import fr.azgardien.cartes.Schofield;
 import fr.azgardien.cartes.Volcanic;
@@ -40,6 +43,7 @@ public class Joueur {
 		return mains;
 	}
 
+	
 	public ArrayList<Carte> getPoses() {
 		return poses;
 	}
@@ -59,6 +63,24 @@ public class Joueur {
 		this.mains = new ArrayList<Carte>();
 		this.poses = new ArrayList<Carte>();
 		this.armeEquipe = null;
+	}
+	
+
+	private void setLunette() {
+		this.visionUp++;
+	}
+	
+	public boolean lunette() {
+		System.out.println(carteDejaPose(new Lunette("", Couleur.Carreau)));
+		if (!carteDejaPose(new Lunette("", Couleur.Carreau))) {
+			setLunette();
+			return true;
+		}
+		return false;
+	}
+	
+	public void removeLunette() {
+		this.visionUp--;
 	}
 	
 	public void pioche(Carte c) {
@@ -90,6 +112,10 @@ public class Joueur {
 				}
 			}
 		}
+ 		
+ 		if (c.getClass() == Lunette.class) {
+ 			removeLunette();
+ 		}
 		this.poses.remove(idx);
 		
 		BangController.getInstance().defausse(c);
@@ -166,6 +192,21 @@ public class Joueur {
 		return false;
 	}
 	
+	public boolean biereSaloon() {
+		if (getRole() == Role.Sherif) {
+			if (getVie() < (getPerso().getVie()+1)) {
+				this.vie++;			
+			}
+		} else {
+			if (getVie() < getPerso().getVie()) {
+				this.vie++;			
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	public void pose(Carte c) {
 		int idx = -1;
 		for (int i = 0 ; i < this.mains.size() ; i++) {
@@ -200,6 +241,16 @@ public class Joueur {
 		
 	}
 	
+	
+	public boolean carteDejaPose(Carte carte) {
+		for (Carte c : this.poses) {
+			if (carte.getClass() == c.getClass()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public boolean isAlive() {
 		return this.vie > 0;
 	}
@@ -226,9 +277,7 @@ public class Joueur {
 
 	@Override
 	public String toString() {
-		return "Joueur [role=" + role + ", vie=" + vie + ", pseudo=" + pseudo + ", perso=" + perso + ", visionUp="
-				+ visionUp + ", location=" + location + ", mains=" + mains + ", currentAction=" + currentAction
-				+ ", finAction=" + finAction + ", contreAction=" + contreAction + ", actionRecu=" + actionRecu + "]";
+		return "Joueur [pseudo=" + pseudo + ", visionUp=" + visionUp + "]";
 	}
 
 	public int getVie() {

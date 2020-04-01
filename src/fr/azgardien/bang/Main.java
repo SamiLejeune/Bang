@@ -2,12 +2,14 @@ package fr.azgardien.bang;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+
 public class Main extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
 		System.out.println("Plugin Bang en route");
-		BangController controller = BangController.getInstance();
+		BangController controller = BangController.getInstance();	
+		BangController.getInstance().plugin = this;
 		getCommand("start").setExecutor(controller);
 		getCommand("choix").setExecutor(controller);
 		getCommand("personnages").setExecutor(controller);
@@ -16,6 +18,8 @@ public class Main extends JavaPlugin {
 	}
 	@Override
 	public void onDisable() {
-		BangController.getInstance().tpFinish();
+		if (BangController.getInstance().getPlayers() != null) {
+			BangController.getInstance().tpFinish();
+		}
 	}
 }

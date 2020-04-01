@@ -25,6 +25,7 @@ public abstract class Personnage {
 	}
 
 
+	
 	public int getDistance() {
 		return distance;
 	}
