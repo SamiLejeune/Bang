@@ -29,6 +29,7 @@ public class Volcanic extends Carte
 		BangController.getInstance().getPlayerServer(source).closeInventory();
 		if (source.poseArme(this)) {
 			Bukkit.broadcastMessage("§a"+source.getPseudo() + " pose une volcanic.");
+			source.getPerso().limiteBang = 10000;
 		}
 		BangController.getInstance().getPlayerServer(source).openInventory(BangController.getInstance().playerInventory(source));
     }

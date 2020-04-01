@@ -12,7 +12,7 @@ public abstract class Personnage {
 	private String nom;
 	private String description;
 	private int rangeLunette, distance;
-	private int limiteBang;
+	public int limiteBang;
 	
 	public int getLimiteBang() {
 		return limiteBang;

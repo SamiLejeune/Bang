@@ -67,6 +67,7 @@ public class BangListeners implements Listener {
 						if (BangController.getInstance().reach(source, cible)) {
 							c.appliquerEffet(source,cible);				
 						} else {
+							source.pioche(c);
 							player.sendMessage("§cVous n'avez pas la portée nécessaire pour Bang ce joueur");
 						}
 					}

@@ -115,6 +115,9 @@ public class Joueur {
  		
  		if (c.getClass() == Lunette.class) {
  			removeLunette();
+ 		} if (BangController.getInstance().estArme(c)) {
+ 			this.armeEquipe = null;
+ 			this.getPerso().limiteBang=1;
  		}
 		this.poses.remove(idx);
 		
