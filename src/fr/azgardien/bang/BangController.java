@@ -49,6 +49,43 @@ public class BangController implements CommandExecutor {
 	public ArrayList<Carte> allCartes;
 	public ArrayList<Carte> pioche;
 	public ArrayList<Carte> defausses;
+	public ArrayList<Carte> magasins;
+	
+	public void removeCarteMagasin(Carte c) {
+		int idx = -1;
+		for (int i = 0 ; i < magasins.size() ; i++) {
+			System.out.println("Parcours remove " + magasins.get(i) + " et " + c);
+			if (magasins.get(i) == c) {
+				System.out.println("ici parcours");
+				idx = i;
+			}
+		}
+		this.magasins.remove(idx);
+	}
+	
+	public void initMagasin() {
+		int taille = this.players.size();
+		for (int i = 0 ;  i < taille ; i++) {
+			this.magasins.add(getCarte());
+		}
+	}
+	
+	public void clearMagasin() {
+		this.magasins.clear();
+		
+		for(Joueur j : this.players) {
+			j.choixMagasin = false;
+		}
+		
+	}
+	
+	public Carte randomCarteMagasin() {
+		Random random = new Random();
+		int max = this.magasins.size()-1;
+		int alea = random.nextInt(max + 1);
+		return this.magasins.get(alea);
+	}
+	
 	private boolean start;
 	public boolean startTask;
 	private Location[] spots;
@@ -59,6 +96,10 @@ public class BangController implements CommandExecutor {
 	private World world;
 	public Joueur currentJoueur;
 	public int currentNbBang;
+	public Joueur currentMagasin;
+	public Joueur lanceurMagasin;
+	
+	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String arg2, String[] args) {
 		if (sender.getServer().getWorld("world").getPlayers().size() > 7) {
@@ -130,6 +171,20 @@ public class BangController implements CommandExecutor {
 		}
 		return false;
 	}
+	
+	
+	public Inventory magasinInventory() {
+		Inventory inv = Bukkit.createInventory(null, 9, "§8Magasin");
+		
+		int k = 0;
+		for (Carte c : magasins) {
+			ItemStack item = c.representation();
+			inv.setItem(k++, item);
+		}
+		
+
+		return inv;
+	}
 
 	public void start() {
 		initLife();
@@ -167,6 +222,22 @@ public class BangController implements CommandExecutor {
 		}
 		return null;
 	}
+	
+	public Joueur nextJoueurMagasin() {
+		for (int i = 0 ; i < this.players.size() ; i++) {
+			if (this.players.get(i) == this.currentMagasin) {
+				if (i == 0) {
+					Joueur j = this.players.get(this.players.size()-1); 
+					return j;
+				} else {
+					Joueur j = this.players.get(i-1);
+					return j;
+				}
+
+			}
+		}
+		return null;
+	}
 
 	public void game() {
 		this.currentJoueur = sherif();
@@ -179,8 +250,11 @@ public class BangController implements CommandExecutor {
 			Player p = getPlayerServer(j);
 			p.teleport(new Location(world, 183.5, 131, 229.5 ,88,0));
 			p.getInventory().clear();
+			resetScoreBoard(p);
 		}
-		resetScoreBoard();
+		
+		
+		
 	}
 
 	public void resetScoreBoard() {
@@ -195,6 +269,19 @@ public class BangController implements CommandExecutor {
 			team.addPlayer(p);
 			p.setPlayerListName(p.getName());
 		}
+	}
+	
+	
+	public void resetScoreBoard(Player p) {
+		Scoreboard board = Bukkit.getScoreboardManager().getMainScoreboard();
+		Team team= null;
+		if (board.getTeam("") == null) {
+			board.registerNewTeam("");
+		} else {
+			team = board.getTeam("");
+		}
+		team.addPlayer(p);
+		p.setPlayerListName(p.getName());	
 	}
 
 	public void exitPlayer(Joueur j) {
@@ -214,7 +301,6 @@ public class BangController implements CommandExecutor {
 		for(Carte c : j.getMains()) {
 			defausse(c);
 		}
-		this.startTask = false;
 		this.getPlayerServer(j).getInventory().clear();
 		this.getPlayerServer(j).teleport(new Location(world, 183.5, 131, 229.5 ,88,0));
 
@@ -550,6 +636,8 @@ public class BangController implements CommandExecutor {
 		this.pioche = CartesFactory.FACTORY.allCartes("pioche.txt");
 		this.allCartes = CartesFactory.FACTORY.allCartes("pioche.txt");
 		this.defausses = new ArrayList<Carte>();
+		
+		this.magasins = new ArrayList<Carte>();
 		shufflePioche();
 		System.out.println("Init size " + this.pioche.size());
 	}
@@ -651,6 +739,16 @@ public class BangController implements CommandExecutor {
 
 	public Carte isGameMaterial(Material m) {
 		for(Carte c : this.allCartes) {
+			if (c.representation().getType() == m) {
+				return c;
+			}
+		}
+		return null;
+	}
+	
+	
+	public Carte carteMagasin(Material m) {
+		for (Carte c : this.magasins) {
 			if (c.representation().getType() == m) {
 				return c;
 			}

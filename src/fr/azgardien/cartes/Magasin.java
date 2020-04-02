@@ -1,11 +1,13 @@
 package fr.azgardien.cartes;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import fr.azgardien.bang.BangController;
 import fr.azgardien.bang.Joueur;
 
 public class Magasin extends Carte
@@ -23,7 +25,16 @@ public class Magasin extends Carte
     @Override
     public void appliquerEffet(Joueur source,Joueur target)
     {
-        //TODO Auto-generated method stub
+        BangController controller = BangController.getInstance();
+        if (controller.magasins.size() == 0) {
+        	controller.initMagasin();
+        }
+        controller.lanceurMagasin = source;
+        controller.currentMagasin = source;
+        
+        Bukkit.broadcastMessage("§a" + source.getPseudo() + " pose un magasin");
+        controller.getPlayerServer(controller.currentJoueur).closeInventory();
+        controller.getPlayerServer(controller.currentJoueur).openInventory(controller.magasinInventory());
     }
 
 	@Override

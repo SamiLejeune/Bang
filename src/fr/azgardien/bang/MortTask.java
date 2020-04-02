@@ -14,8 +14,8 @@ public class MortTask extends BukkitRunnable {
 			ArrayList<Joueur> list = BangController.getInstance().getPlayers();
 			for (Joueur j : list) {
 				if (j.getVie() == 0) {
-					BangController.getInstance().exitPlayer(j);
-					
+					BangController.getInstance().resetScoreBoard(BangController.getInstance().getPlayerServer(j));
+					BangController.getInstance().exitPlayer(j);				
 					if (j.getRole() == Role.HorsLaLoi) {
 						Bukkit.broadcastMessage("§b"+j.tueur.getPseudo() + " gagne 3 cartes");
 						j.tueur.pioche(BangController.getInstance().getCarte());

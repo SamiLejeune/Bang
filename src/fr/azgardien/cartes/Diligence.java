@@ -1,5 +1,6 @@
 package fr.azgardien.cartes;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -24,7 +25,7 @@ public class Diligence extends Carte
     @Override
     public void appliquerEffet(Joueur source,Joueur target)
     {
-    	
+    	Bukkit.broadcastMessage("§a" + source.getPseudo() + " utilise une carte diligence et pioche 3 cartes");
 		source.pioche(BangController.getInstance().getCarte());
 		source.pioche(BangController.getInstance().getCarte());
 		source.pioche(BangController.getInstance().getCarte());

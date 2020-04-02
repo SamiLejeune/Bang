@@ -38,7 +38,9 @@ public class Joueur {
 	public Joueur joueurAttaque;
 	public Joueur tueur;
 	public Carte armeEquipe;
-
+	
+	public boolean choixMagasin;
+	
 	public ArrayList<Carte> getMains() {
 		return mains;
 	}
@@ -75,6 +77,7 @@ public class Joueur {
 		this.mains = new ArrayList<Carte>();
 		this.poses = new ArrayList<Carte>();
 		this.armeEquipe = null;
+		this.choixMagasin = false;
 	}
 
 

@@ -52,6 +52,8 @@ public class Gatling extends Carte
 			}
 		} else if (target.finAction == true && target.contreAction == false) {
 			target.bang(source);
+			if (BangController.getInstance().currentNbBang > 0) BangController.getInstance().currentNbBang--;
+			
 			target.tueur = source;
 		}
         

@@ -1,4 +1,4 @@
-package fr.azgardien.bang;
+	package fr.azgardien.bang;
 
 import org.bukkit.plugin.java.JavaPlugin;
 

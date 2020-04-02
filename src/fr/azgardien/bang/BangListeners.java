@@ -27,6 +27,7 @@ import fr.azgardien.cartes.Bang;
 import fr.azgardien.cartes.Biere;
 import fr.azgardien.cartes.Carte;
 import fr.azgardien.cartes.Lunette;
+import fr.azgardien.cartes.Magasin;
 import fr.azgardien.cartes.Rate;
 import fr.azgardien.roles.Personnage;
 
@@ -111,14 +112,18 @@ public class BangListeners implements Listener {
 		ItemStack current = event.getCurrentItem();
 		
 		if(current == null) return;
-		if (BangController.getInstance().getPlayers() == null) return;
+		BangController instance = BangController.getInstance();
+		if (instance.getPlayers() == null) return;
 		
-		Joueur joueur = BangController.getInstance().getJoueur(player);
-		if (BangController.getInstance().currentJoueur != joueur && !inv.getName().equalsIgnoreCase("§8Action")) {
-			player.sendMessage("§cCe n'est pas votre tour de jouer");
-			player.closeInventory();
-			event.setCancelled(true);
-			return;
+		Joueur joueur = instance.getJoueur(player);
+		
+		if(instance.lanceurMagasin == null) {
+			if (instance.currentJoueur != joueur && !inv.getName().equalsIgnoreCase("§8Action")) {
+				player.sendMessage("§cCe n'est pas votre tour de jouer");
+				player.closeInventory();
+				event.setCancelled(true);
+				return;
+			}
 		}
 		
 		Material type = current.getType();
@@ -132,9 +137,9 @@ public class BangListeners implements Listener {
 			} else {
 				ItemStack item = inv.getItem(17);
 				String actionCarte = item.getItemMeta().getDisplayName().substring(2);
-				Carte sourceAction = BangController.getInstance().getType(actionCarte);
+				Carte sourceAction = instance.getType(actionCarte);
 				System.out.println(sourceAction);
-				Carte c = BangController.getInstance().isGameMaterial(type);
+				Carte c = instance.isGameMaterial(type);
 				System.out.println(c);
 				if (sourceAction.carteQuiContre().getNom().equals(c.getNom())) {
 					// on utilise la carte
@@ -142,7 +147,7 @@ public class BangListeners implements Listener {
 					joueur.finAction = true;
 					c.appliquerEffet(null, joueur);	
 					if (sourceAction.getClass() == Bang.class) {
-						BangController.getInstance().currentNbBang++;
+						instance.currentNbBang++;
 					}	
 					joueur.defausse(c);			
 					player.closeInventory();
@@ -159,16 +164,24 @@ public class BangListeners implements Listener {
 		
 		if (inv.getName().equalsIgnoreCase("§8Interaction")) {
 			
-			//BLOQUER COMPLETEMENT ACTION SI PAS FINI
+			//BLOQUER COMPLETEMENT ACTION SI PAS FINI MAIS PAS SI YA MAGASIN
 			
-			for (Joueur j : BangController.getInstance().getPlayers()) {
-				if (j != joueur) {
-					if (j.sourceAction != null ) {
-						player.sendMessage("§cAttendez les actions des autres joueurs");
-						event.setCancelled(true);
-						return;
+			
+				for (Joueur j : instance.getPlayers()) {
+					if (j != joueur) {
+						if (j.sourceAction != null) {
+							player.sendMessage("§cAttendez les actions des autres joueurs");
+							event.setCancelled(true);
+							return;
+						}
 					}
 				}
+			
+				
+			if (BangController.getInstance().lanceurMagasin != null) {
+				player.sendMessage("§cAttendez les actions des autres joueurs");
+				event.setCancelled(true);
+				return;
 			}
 			
 			
@@ -182,21 +195,21 @@ public class BangListeners implements Listener {
 				if (joueur.getMains().size() > joueur.getVie()) {
 					player.sendMessage("§cVous ne pouvez pas passer votre tour, régulez votre nombre de cartes");
 				} else {
-					BangController.getInstance().resetPartialPlateforme(joueur.getLocation());
-					BangController.getInstance().currentJoueur = BangController.getInstance().nextJoueur();
-					BangController.getInstance().currentJoueur.piocheTour();
-					if (BangController.getInstance().doitMelanger()) {
-						BangController.getInstance().melanger();						
+					instance.resetPartialPlateforme(joueur.getLocation());
+					instance.currentJoueur = instance.nextJoueur();
+					instance.currentJoueur.piocheTour();
+					if (instance.doitMelanger()) {
+						instance.melanger();						
 					}
-					BangController.getInstance().currentNbBang = 0;
-					BangController.getInstance().affichageCurrent();
+					instance.currentNbBang = 0;
+					instance.affichageCurrent();
 					player.closeInventory();
 				}
 				
 			} else {
-				Carte c = BangController.getInstance().isGameMaterial(type);
+				Carte c = instance.isGameMaterial(type);
 				if (c != null) {
-					if (BangController.getInstance().isTargettableCarte(c)) {
+					if (instance.isTargettableCarte(c)) {
 						if (c.getClass() == Bang.class) {
 							System.out.println(joueur.peutTirer());
 							if (!joueur.peutTirer()) {
@@ -213,26 +226,27 @@ public class BangListeners implements Listener {
 						item.setItemMeta(itemD);
 						player.getInventory().setItem(8, item);
 						player.closeInventory();
-						BangController.getInstance().getJoueur(player).currentAction = c;
+						instance.getJoueur(player).currentAction = c;
 					} else if (c.getClass() == Rate.class) {
 						//Nothing
-					} else {
-						System.out.println("ici");
-						c.appliquerEffet(BangController.getInstance().getJoueur(player),null);
+					}  else {
+						c.appliquerEffet(instance.getJoueur(player),null);
 					}
-					if (BangController.getInstance().estArme(c) || c.getClass() == Biere.class || c.getClass() == Lunette.class) {
+					if (instance.estArme(c) || c.getClass() == Biere.class || c.getClass() == Lunette.class ) {
+						
+					} else if (c.getClass() == Magasin.class) {
+						joueur.defausse(c);
 						
 					} else {
-						if (!BangController.getInstance().isTargettableCarte(c)) {
+						if (!instance.isTargettableCarte(c)) {
 							player.closeInventory();
 							joueur.defausse(c);
-							player.openInventory(BangController.getInstance().playerInventory(joueur));
+							player.openInventory(instance.playerInventory(joueur));
 						} else {
 							if (c.getClass() == Bang.class) {
 								joueur.defausse(c);
 							}
 						}
-						
 					}
 				}
 			}
@@ -242,13 +256,39 @@ public class BangListeners implements Listener {
 			event.setCancelled(true);
 		}
 		
+		if (inv.getName().equalsIgnoreCase("§8Magasin")) {
+			Carte c = instance.carteMagasin(type);
+			if (c!= null) {
+					Bukkit.broadcastMessage("§b"+joueur.getPseudo() + " prend " + c.getNom());
+					joueur.pioche(c);
+					instance.removeCarteMagasin(c);
+					joueur.choixMagasin = true;
+					if (instance.nextJoueurMagasin() != instance.lanceurMagasin) {
+						player.closeInventory();
+						instance.currentMagasin = instance.nextJoueurMagasin();
+						instance.getPlayerServer(instance.currentMagasin).openInventory(instance.magasinInventory());
+						Bukkit.broadcastMessage("§aAu tour de " + instance.currentMagasin.getPseudo() + " de choisir sa carte dans le magasin.");
+					} else {
+						instance.currentMagasin = null;
+						instance.lanceurMagasin = null;
+						
+						instance.clearMagasin();
+						System.out.println("On fait le tour du magasin");
+						player.closeInventory();
+					}
+					
+					
+			}
+			event.setCancelled(true);
+		}
+		
 		if (inv.getName().equalsIgnoreCase("§8Défausser")) {
 			
 			if (type == Material.ARROW) {
 				player.closeInventory();
-				player.openInventory(BangController.getInstance().playerInventory(joueur));
+				player.openInventory(instance.playerInventory(joueur));
 			} else {
-				Carte c = BangController.getInstance().isGameMaterial(type);
+				Carte c = instance.isGameMaterial(type);
 				if (c!= null) {
 					if (joueur.getMains().size() <= joueur.getVie()) {
 						player.sendMessage("§cVous ne pouvez pas défaussez");
@@ -270,7 +310,8 @@ public class BangListeners implements Listener {
 	public void closeInventory(InventoryCloseEvent event) {
 		Player player = (Player) event.getPlayer();
 		Inventory inv = event.getInventory();
-		Joueur j = BangController.getInstance().getJoueur(player);
+		BangController instance = BangController.getInstance();
+		Joueur j = instance.getJoueur(player);
 		if (j != null) {
 			if (inv.getName().equalsIgnoreCase("§8Action") && !j.finAction ) {
 				j.finAction = true;
@@ -282,7 +323,26 @@ public class BangListeners implements Listener {
 				j.sourceAction = null;
 				j.joueurAttaque = null;
 			}
-		}	
+			
+			if (inv.getName().equalsIgnoreCase("§8Magasin") && j.choixMagasin == false) {
+				Carte random = instance.randomCarteMagasin();
+				Bukkit.broadcastMessage("§b"+j.getPseudo() + " prend " + random.getNom());
+				j.pioche(random);
+				instance.removeCarteMagasin(random);
+				if (instance.nextJoueurMagasin() != instance.lanceurMagasin) {
+					instance.currentMagasin = instance.nextJoueurMagasin();
+					instance.getPlayerServer(instance.currentMagasin).openInventory(instance.magasinInventory());
+					Bukkit.broadcastMessage("§aAu tour de " + instance.currentMagasin.getPseudo() + " de choisir sa carte dans le magasin.");
+				} else {
+					instance.currentMagasin = null;
+					instance.lanceurMagasin = null;
+					
+					instance.clearMagasin();
+					System.out.println("On fait le tour du magasin");
+					player.closeInventory();
+				}
+			}
+		}
 	}
 	
     public static Player getTargetPlayer(final Player player) {
