@@ -2,9 +2,11 @@ package fr.azgardien.bang;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -17,6 +19,7 @@ import fr.azgardien.cartes.Schofield;
 import fr.azgardien.cartes.Volcanic;
 import fr.azgardien.cartes.Winchester;
 import fr.azgardien.roles.Personnage;
+import fr.azgardien.roles.WillyLeKid;
 
 public class Joueur {
 
@@ -38,6 +41,9 @@ public class Joueur {
 	public Joueur joueurAttaque;
 	public Joueur tueur;
 	public Carte armeEquipe;
+	
+	
+	public Joueur joueurBraque;
 	
 	public boolean choixMagasin;
 	
@@ -164,6 +170,14 @@ public class Joueur {
 		return this.choisi;
 	}
 
+	public boolean estPose(Carte carte) {
+		for (Carte c : this.poses) {
+			if (carte.getNom().equals(carte.getNom())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public Personnage getPerso() {
 		return perso;
@@ -264,6 +278,43 @@ public class Joueur {
 
 	}
 
+	
+	public Carte getRandomFromMain() {
+		Random random = new Random();
+		int max = this.mains.size()-1;
+		int alea = random.nextInt(max + 1);
+		System.out.println("Alea " + alea);
+		Carte c =  this.mains.get(alea);
+		mains.remove(alea);
+		return c;
+	}
+	
+	public Carte getFromMain(Material type) {
+		int idx = -1;
+		Carte c = null;
+		for (int i = 0 ; i < mains.size() ; i++) {
+			if (getMains().get(i).representation().getType() == type) {
+				idx = i;
+				c = mains.get(i);
+			}
+		}
+		mains.remove(idx);
+		return c;
+	}
+	
+	public Carte getFromPose( Material type) {
+		int idx = -1;
+		Carte c = null;
+		for (int i = 0 ; i < poses.size() ; i++) {
+			if (poses.get(i).representation().getType() == type) {
+				idx = i;
+				c = poses.get(i);
+			}
+		}
+		poses.remove(idx);
+		return c;
+	}
+	
 	public void defausseArme(Carte c) {
 		int idx = -1;
 
@@ -278,6 +329,19 @@ public class Joueur {
 		BangController.getInstance().defausse(c);
 	}
 
+	public void updateRemoveTargettable(Carte carte) {
+		BangController controller = BangController.getInstance();
+		if (controller.estArme(carte)) {
+			this.armeEquipe = null;
+			if (this.perso.getClass() != WillyLeKid.class ) {
+				this.perso.limiteBang = 1;
+			}
+		} else if (carte.getClass() == Lunette.class) {
+			this.removeLunette();
+		}
+		
+	}
+	
 	public void removeCartePose(Carte carte) {
 		int idx = -1;
 

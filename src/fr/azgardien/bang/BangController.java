@@ -29,6 +29,8 @@ import org.bukkit.scoreboard.Team;
 import fr.azgardien.cartes.Carabine;
 import fr.azgardien.cartes.Carte;
 import fr.azgardien.cartes.CartesFactory;
+import fr.azgardien.cartes.Couleur;
+import fr.azgardien.cartes.Lunette;
 import fr.azgardien.cartes.Remington;
 import fr.azgardien.cartes.Schofield;
 import fr.azgardien.cartes.Volcanic;
@@ -50,7 +52,7 @@ public class BangController implements CommandExecutor {
 	public ArrayList<Carte> pioche;
 	public ArrayList<Carte> defausses;
 	public ArrayList<Carte> magasins;
-	
+
 	public void removeCarteMagasin(Carte c) {
 		int idx = -1;
 		for (int i = 0 ; i < magasins.size() ; i++) {
@@ -62,30 +64,30 @@ public class BangController implements CommandExecutor {
 		}
 		this.magasins.remove(idx);
 	}
-	
+
 	public void initMagasin() {
 		int taille = this.players.size();
 		for (int i = 0 ;  i < taille ; i++) {
 			this.magasins.add(getCarte());
 		}
 	}
-	
+
 	public void clearMagasin() {
 		this.magasins.clear();
-		
+
 		for(Joueur j : this.players) {
 			j.choixMagasin = false;
 		}
-		
+
 	}
-	
+
 	public Carte randomCarteMagasin() {
 		Random random = new Random();
 		int max = this.magasins.size()-1;
 		int alea = random.nextInt(max + 1);
 		return this.magasins.get(alea);
 	}
-	
+
 	private boolean start;
 	public boolean startTask;
 	private Location[] spots;
@@ -98,8 +100,8 @@ public class BangController implements CommandExecutor {
 	public int currentNbBang;
 	public Joueur currentMagasin;
 	public Joueur lanceurMagasin;
-	
-	
+
+
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String arg2, String[] args) {
 		if (sender.getServer().getWorld("world").getPlayers().size() > 7) {
@@ -171,17 +173,17 @@ public class BangController implements CommandExecutor {
 		}
 		return false;
 	}
-	
-	
+
+
 	public Inventory magasinInventory() {
 		Inventory inv = Bukkit.createInventory(null, 9, "§8Magasin");
-		
+
 		int k = 0;
 		for (Carte c : magasins) {
 			ItemStack item = c.representation();
 			inv.setItem(k++, item);
 		}
-		
+
 
 		return inv;
 	}
@@ -222,7 +224,7 @@ public class BangController implements CommandExecutor {
 		}
 		return null;
 	}
-	
+
 	public Joueur nextJoueurMagasin() {
 		for (int i = 0 ; i < this.players.size() ; i++) {
 			if (this.players.get(i) == this.currentMagasin) {
@@ -252,9 +254,9 @@ public class BangController implements CommandExecutor {
 			p.getInventory().clear();
 			resetScoreBoard(p);
 		}
-		
-		
-		
+
+
+
 	}
 
 	public void resetScoreBoard() {
@@ -270,8 +272,8 @@ public class BangController implements CommandExecutor {
 			p.setPlayerListName(p.getName());
 		}
 	}
-	
-	
+
+
 	public void resetScoreBoard(Player p) {
 		Scoreboard board = Bukkit.getScoreboardManager().getMainScoreboard();
 		Team team= null;
@@ -293,11 +295,11 @@ public class BangController implements CommandExecutor {
 		}
 		Bukkit.broadcastMessage("§aLe joueur " + j.getPseudo() + " est éliminé ! Il était " + j.getRole());
 		this.players.remove(idx);
-		
+
 		for(Carte c : j.getPoses()) {
 			defausse(c);
 		}
-		
+
 		for(Carte c : j.getMains()) {
 			defausse(c);
 		}
@@ -357,8 +359,8 @@ public class BangController implements CommandExecutor {
 		}
 		return false;
 	}
-	
-	
+
+
 	public boolean sherifWin() {
 		for (Joueur j : this.players) {
 			if (j.getRole() == Role.HorsLaLoi || j.getRole() == Role.Renegat ) {
@@ -636,7 +638,7 @@ public class BangController implements CommandExecutor {
 		this.pioche = CartesFactory.FACTORY.allCartes("pioche.txt");
 		this.allCartes = CartesFactory.FACTORY.allCartes("pioche.txt");
 		this.defausses = new ArrayList<Carte>();
-		
+
 		this.magasins = new ArrayList<Carte>();
 		shufflePioche();
 		System.out.println("Init size " + this.pioche.size());
@@ -645,7 +647,7 @@ public class BangController implements CommandExecutor {
 	public boolean doitMelanger() {
 		return this.pioche.size() < 15;
 	}
-	
+
 	public void melanger() {
 		ArrayList<Carte> piocheBougePo = new ArrayList<Carte>();
 		for (int i = 0 ; i < 9 ; i++) {
@@ -656,7 +658,7 @@ public class BangController implements CommandExecutor {
 		this.pioche = (ArrayList<Carte>) piocheBougePo.clone();
 		this.defausses.clear();
 	}
-	
+
 	public int allCarteSize() {
 		int size = this.pioche.size() + this.defausses.size();
 		for(Joueur j : this.players) {
@@ -665,7 +667,7 @@ public class BangController implements CommandExecutor {
 		}
 		return size;
 	}
-	
+
 	public boolean estArme(Carte c) {
 		return (c.getClass() == Schofield.class ||c.getClass() == Remington.class || c.getClass() == Winchester.class || c.getClass() == Volcanic.class ||
 				c.getClass() == Carabine.class);
@@ -745,8 +747,8 @@ public class BangController implements CommandExecutor {
 		}
 		return null;
 	}
-	
-	
+
+
 	public Carte carteMagasin(Material m) {
 		for (Carte c : this.magasins) {
 			if (c.representation().getType() == m) {
@@ -822,6 +824,70 @@ public class BangController implements CommandExecutor {
 		return null;
 	}
 
+
+	public Inventory pickJoueur(Joueur j,String nom) {
+		Inventory vision = Bukkit.createInventory(null, 36,"§8"+nom);
+		ItemStack cache = new ItemStack(Material.ENDER_PEARL);
+		ItemMeta cacheD = cache.getItemMeta();
+		cacheD.setDisplayName("§bCarte caché");
+		cacheD.addEnchant(Enchantment.DAMAGE_ALL, 200, true);
+		cacheD.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+		cache.setItemMeta(cacheD);
+
+		int k = 0;
+		for (Carte c : j.getMains()) {
+			vision.setItem(k++, cache);
+		}
+
+		for (Carte c : j.getPoses()) {
+			vision.setItem(k++,c.representation());
+		}
+
+		return vision;
+	}
+
+	public Inventory visionJoueur(Joueur j, String action) {
+
+		Inventory vision = Bukkit.createInventory(null, 36,"§8Vision");
+		System.out.println(vision);
+		ItemStack cache = new ItemStack(Material.ENDER_PEARL);
+		ItemMeta cacheD = cache.getItemMeta();
+		cacheD.setDisplayName("§eCarte caché");
+		cacheD.addEnchant(Enchantment.DAMAGE_ALL, 200, true);
+		cacheD.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+		cache.setItemMeta(cacheD);
+
+
+		ItemStack retour = new ItemStack(Material.ARROW);
+		ItemMeta retourD = retour.getItemMeta();
+		retourD.setDisplayName("§e"+j.getPseudo());
+		retourD.setLore(Arrays.asList("§d"+"Retour"));
+		retourD.addEnchant(Enchantment.DAMAGE_ALL, 200, true);
+		retourD.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+		retour.setItemMeta(retourD);
+
+		ItemStack valide = new ItemStack(Material.EMERALD_BLOCK);
+		ItemMeta valideD = valide.getItemMeta();
+		valideD.setDisplayName("§e"+action);
+		valideD.setLore(Arrays.asList("§d"+"Valider"));
+		valideD.addEnchant(Enchantment.DAMAGE_ALL, 200, true);
+		valideD.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+		valide.setItemMeta(valideD);
+
+		int k = 0;
+		for (Carte c : j.getMains()) {
+			vision.setItem(k++, cache);
+		}
+
+		for (Carte c : j.getPoses()) {
+			vision.setItem(k++,c.representation());
+		}
+
+		vision.setItem(34, valide);
+		vision.setItem(35, retour);
+		return vision;
+	}
+
 	private void shuffleRoles() {
 		for (int i = 0 ; i < this.current.length ; i++) {
 			Random random = new Random();
@@ -846,6 +912,16 @@ public class BangController implements CommandExecutor {
 		Collections.shuffle(pioche);
 	}
 
+	public boolean peutBraquage(Joueur source , Joueur cible) {
+		if (source.estPose(new Lunette("", Couleur.Carreau))) {
+			return (getMinimumDistance(players, source, cible)+1) <= 2 ;
+		} else {
+			return getMinimumDistance(players, source, cible) == 1;
+		}
+	}
+
+	
+	
 	private Role[] getRoles(int nbJoueur) {
 		Role[] role2Joueurs = new Role[] {Role.Sherif,Role.Renegat};
 		Role[] role3Joueurs = new Role[] {Role.Sherif,Role.Renegat,Role.HorsLaLoi};

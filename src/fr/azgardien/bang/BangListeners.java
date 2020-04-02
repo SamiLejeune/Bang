@@ -1,5 +1,7 @@
 package fr.azgardien.bang;
 
+import java.util.Random;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -25,7 +27,10 @@ import org.bukkit.util.Vector;
 
 import fr.azgardien.cartes.Bang;
 import fr.azgardien.cartes.Biere;
+import fr.azgardien.cartes.Braquage;
 import fr.azgardien.cartes.Carte;
+import fr.azgardien.cartes.Couleur;
+import fr.azgardien.cartes.CoupDeFoudre;
 import fr.azgardien.cartes.Lunette;
 import fr.azgardien.cartes.Magasin;
 import fr.azgardien.cartes.Rate;
@@ -72,6 +77,18 @@ public class BangListeners implements Listener {
 							source.pioche(c);
 							player.sendMessage("§cVous n'avez pas la portée nécessaire pour Bang ce joueur");
 						}
+					} else if (c.getClass() == Braquage.class) {
+						
+						if (BangController.getInstance().peutBraquage(source, cible)) {
+							Bukkit.broadcastMessage("§a"+source.getPseudo() + " regarde le jeu de " + cible.getPseudo() + " pour un braquage");
+							player.openInventory(BangController.getInstance().visionJoueur(cible,"Braquage"));
+						} else {
+							player.sendMessage("§cVous ne pouvez pas le braquer");
+						}
+						
+					} else if (c.getClass() == CoupDeFoudre.class) {
+						Bukkit.broadcastMessage("§a"+source.getPseudo() + " regarde le jeu de " + cible.getPseudo() + " pour un coup de foudre");
+						player.openInventory(BangController.getInstance().visionJoueur(cible,"Coup de foudre"));
 					}
 					player.getInventory().remove(current);
 					
@@ -211,7 +228,6 @@ public class BangListeners implements Listener {
 				if (c != null) {
 					if (instance.isTargettableCarte(c)) {
 						if (c.getClass() == Bang.class) {
-							System.out.println(joueur.peutTirer());
 							if (!joueur.peutTirer()) {
 								player.sendMessage("§cVous êtes limité à un seul Bang par tour");
 								event.setCancelled(true);
@@ -273,7 +289,6 @@ public class BangListeners implements Listener {
 						instance.lanceurMagasin = null;
 						
 						instance.clearMagasin();
-						System.out.println("On fait le tour du magasin");
 						player.closeInventory();
 					}
 					
@@ -303,7 +318,76 @@ public class BangListeners implements Listener {
 				
 			}
 			event.setCancelled(true);
-		}	
+		}
+		
+		if (inv.getName().equalsIgnoreCase("§8Vision")) {
+			
+			if (type == Material.ARROW) {
+				player.closeInventory();
+				player.openInventory(instance.playerInventory(joueur));
+			} else if (type == Material.EMERALD_BLOCK) {
+				player.closeInventory();
+				ItemStack item = inv.getItem(34);
+				String actionCarte = item.getItemMeta().getDisplayName().substring(2);
+				Carte sourceAction = instance.getType(actionCarte);
+				ItemStack item2 = inv.getItem(35);
+				String name = item2.getItemMeta().getDisplayName().substring(2);
+				Joueur cible = BangController.getInstance().getJoueur(name);
+				
+				Inventory pick = BangController.getInstance().pickJoueur(cible, actionCarte);
+				if (sourceAction.getClass() == Braquage.class) {
+					joueur.joueurBraque = cible;
+					Bukkit.broadcastMessage("§a"+joueur.getPseudo() + " braque " + cible.getPseudo());
+				} else {
+					joueur.joueurBraque = cible;
+					Bukkit.broadcastMessage("§a"+joueur.getPseudo() + " va coup de foudre " + cible.getPseudo());
+				}
+				player.openInventory(pick);
+			}
+			
+			event.setCancelled(true);
+		}
+		
+		if (inv.getName().equalsIgnoreCase("§8Braquage") ) {
+			if (type == Material.ENDER_PEARL) {
+				Carte carte = joueur.joueurBraque.getRandomFromMain();
+				joueur.pioche(carte);
+				Bukkit.broadcastMessage("§b"+joueur.getPseudo() + " récupère : " + carte.getNom() );
+			} else {
+				Carte carte = joueur.joueurBraque.getFromPose(type);
+				joueur.pioche(carte);
+				joueur.joueurBraque.updateRemoveTargettable(carte);
+				Bukkit.broadcastMessage("§b"+joueur.getPseudo() + " récupère : " + carte.getNom() );
+			}
+			
+			Braquage braquage = new Braquage("", Couleur.Carreau);
+		    joueur.getFromMain(braquage.representation().getType());
+			joueur.joueurBraque = null;
+			player.closeInventory();
+			
+			player.openInventory(BangController.getInstance().playerInventory(joueur));
+			event.setCancelled(true);
+			
+		}
+		
+		if (inv.getName().equalsIgnoreCase("§8Coup de foudre")) {
+			if (type == Material.ENDER_PEARL) {
+				Carte carte = joueur.joueurBraque.getRandomFromMain();
+				Bukkit.broadcastMessage("§b"+joueur.joueurBraque.getPseudo() + " perd " + carte.getNom() );
+			} else {
+				Carte carte = joueur.joueurBraque.getFromPose(type);
+				joueur.joueurBraque.updateRemoveTargettable(carte);
+				Bukkit.broadcastMessage("§b"+joueur.joueurBraque.getPseudo() + " perd " + carte.getNom() );
+			}
+			
+			CoupDeFoudre foudre = new CoupDeFoudre("", Couleur.Carreau);
+		    joueur.getFromMain(foudre.representation().getType());
+			joueur.joueurBraque = null;
+			player.closeInventory();
+			
+			player.openInventory(BangController.getInstance().playerInventory(joueur));
+			event.setCancelled(true);
+		}
 	}
 	
 	@EventHandler
@@ -335,10 +419,8 @@ public class BangListeners implements Listener {
 					Bukkit.broadcastMessage("§aAu tour de " + instance.currentMagasin.getPseudo() + " de choisir sa carte dans le magasin.");
 				} else {
 					instance.currentMagasin = null;
-					instance.lanceurMagasin = null;
-					
+					instance.lanceurMagasin = null;			
 					instance.clearMagasin();
-					System.out.println("On fait le tour du magasin");
 					player.closeInventory();
 				}
 			}
