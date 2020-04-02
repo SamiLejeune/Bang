@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -87,8 +88,11 @@ public class BangListeners implements Listener {
 			def.setItem(i++, c.representation());
 		}
 		for (Carte c : joueur.getPoses()) {
-			def.setItem(i++, c.representation());
+			if (!BangController.getInstance().estArme(c)) {
+				def.setItem(i++, c.representation());
+			}		
 		}
+		
 		ItemStack retour = new ItemStack(Material.ARROW);
 		ItemMeta retourD = retour.getItemMeta();
 		retourD.setDisplayName("§6Retour");
@@ -151,6 +155,19 @@ public class BangListeners implements Listener {
 		
 		if (inv.getName().equalsIgnoreCase("§8Interaction")) {
 			
+			//BLOQUER COMPLETEMENT ACTION SI PAS FINI
+			
+			for (Joueur j : BangController.getInstance().getPlayers()) {
+				if (j != joueur) {
+					if (j.sourceAction != null ) {
+						player.sendMessage("§cAttendez les actions des autres joueurs");
+						event.setCancelled(true);
+						return;
+					}
+				}
+			}
+			
+			
 			if (type == Material.PAPER || type == Material.DEAD_BUSH || type == Material.STAINED_GLASS_PANE) {
 				//Nothing
 			} else if (type == Material.ENDER_PORTAL_FRAME) {
@@ -164,7 +181,11 @@ public class BangListeners implements Listener {
 					BangController.getInstance().resetPartialPlateforme(joueur.getLocation());
 					BangController.getInstance().currentJoueur = BangController.getInstance().nextJoueur();
 					BangController.getInstance().currentJoueur.piocheTour();
-					BangController.getInstance().partialShuffle();
+					System.out.println(BangController.getInstance().allCarteSize());
+					if (BangController.getInstance().doitMelanger()) {
+						BangController.getInstance().melanger();						
+					}
+					System.out.println(BangController.getInstance().getPioche());
 					BangController.getInstance().currentNbBang = 0;
 					BangController.getInstance().affichageCurrent();
 					player.closeInventory();
@@ -214,6 +235,7 @@ public class BangListeners implements Listener {
 			}
 			
 			
+			
 			event.setCancelled(true);
 		}
 		
@@ -225,10 +247,15 @@ public class BangListeners implements Listener {
 			} else {
 				Carte c = BangController.getInstance().isGameMaterial(type);
 				if (c!= null) {
-					Bukkit.broadcastMessage("§b"+joueur.getPseudo() + " défausse une carte " + c.getNom());
-					joueur.defausse(c);
-					player.closeInventory();
-					player.openInventory(defausseInventory(player));
+					if (joueur.getMains().size() <= joueur.getVie()) {
+						player.sendMessage("§cVous ne pouvez pas défaussez");
+					} else {
+						Bukkit.broadcastMessage("§b"+joueur.getPseudo() + " défausse une carte " + c.getNom());
+						joueur.defausse(c);
+						player.closeInventory();
+						player.openInventory(defausseInventory(player));		
+					}
+						
 				}
 				
 			}
@@ -282,8 +309,7 @@ public class BangListeners implements Listener {
         return target;
     }
     
-  
-    
+ 
     @EventHandler
     public void disconnect(PlayerQuitEvent event) {
     	Player player = event.getPlayer();

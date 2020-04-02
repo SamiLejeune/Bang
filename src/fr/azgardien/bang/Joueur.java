@@ -19,7 +19,7 @@ import fr.azgardien.cartes.Winchester;
 import fr.azgardien.roles.Personnage;
 
 public class Joueur {
-	
+
 	private Role role;
 	private int vie;
 	private Personnage[] choix;
@@ -30,31 +30,43 @@ public class Joueur {
 	private Location location;
 	private ArrayList<Carte> mains;
 	public Carte currentAction;
-	
+
 	public boolean finAction;
 	public boolean contreAction;
 	public Joueur sourceAction;
 	public Carte actionRecu;
 	public Joueur joueurAttaque;
-	
+	public Joueur tueur;
 	public Carte armeEquipe;
 
 	public ArrayList<Carte> getMains() {
 		return mains;
 	}
 
-	
+
 	public ArrayList<Carte> getPoses() {
 		return poses;
 	}
 
 	private ArrayList<Carte> poses;
-	
+
 
 	public Location getLocation() {
 		return location;
 	}
 
+	public void clear() {
+		for (Carte c : this.mains) {
+			BangController.getInstance().defausse(c);
+		} 
+		
+		for (Carte c : this.poses) {
+			BangController.getInstance().defausse(c);
+		}
+		this.mains.clear();
+		this.poses.clear();
+	}
+	
 	public Joueur(String pseudo) {
 		this.pseudo = pseudo;
 		this.choix = new Personnage[2];
@@ -64,12 +76,12 @@ public class Joueur {
 		this.poses = new ArrayList<Carte>();
 		this.armeEquipe = null;
 	}
-	
+
 
 	private void setLunette() {
 		this.visionUp++;
 	}
-	
+
 	public boolean lunette() {
 		System.out.println(carteDejaPose(new Lunette("", Couleur.Carreau)));
 		if (!carteDejaPose(new Lunette("", Couleur.Carreau))) {
@@ -78,20 +90,20 @@ public class Joueur {
 		}
 		return false;
 	}
-	
+
 	public void removeLunette() {
 		this.visionUp--;
 	}
-	
+
 	public void pioche(Carte c) {
 		this.mains.add(c);
 	}
-	
+
 	public void piocheTour() {
 		this.mains.addAll(this.perso.piocheTour());
 	}
-	
-	
+
+
 	public void defausse(Carte c) {
 		int idx = -1;
 
@@ -105,34 +117,38 @@ public class Joueur {
 			BangController.getInstance().defausse(c);
 			return;
 		}
- 		if (idx == -1) {
+
+		if (idx == -1) {
 			for (int i = 0 ; i < this.poses.size() ; i++) {
 				if (this.poses.get(i).getNom() == c.getNom()) {
 					idx = i;
 				}
 			}
 		}
- 		
- 		if (c.getClass() == Lunette.class) {
- 			removeLunette();
- 		} if (BangController.getInstance().estArme(c)) {
- 			this.armeEquipe = null;
- 			this.getPerso().limiteBang=1;
- 		}
+		if (c.getClass() == Lunette.class) {
+			removeLunette();
+		}
+
 		this.poses.remove(idx);
-		
+
 		BangController.getInstance().defausse(c);
-		
+
 	}
-	
+
+
+
+	public boolean estArmePose(Carte c) {
+		return this.armeEquipe.getClass() == c.getClass();
+	}
+
 	public int getVisionUp() {
 		return visionUp;
 	}
-	
+
 	public void setLocation(Location loc) {
 		this.location = loc;
 	}
-	
+
 	public Personnage[] getChoix() {
 		return choix;
 	}
@@ -140,12 +156,12 @@ public class Joueur {
 	public void ready() {
 		this.choisi = true;
 	}
-	
+
 	public boolean aChoisi() {
 		return this.choisi;
 	}
-	
-	
+
+
 	public Personnage getPerso() {
 		return perso;
 	}
@@ -154,29 +170,29 @@ public class Joueur {
 		this.choix[0] = p1;
 		this.choix[1] = p2;
 	}
-	
+
 	public void setPerso(Personnage p) {
 		this.perso = p;
 	}
-	
+
 	public void bang(Joueur source) {
 		String msg = this.getPerso().touche(this, source);
 		BangController.getInstance().currentNbBang++;
 		Bukkit.broadcastMessage(msg);
-		
+
 	}
-	
+
 	public void gatling() {
-		
+
 	}
 	public void indiens() {
-		
+
 	}
-	
+
 	public void duel(Joueur j) {
-		
+
 	}
-	
+
 	public boolean biere(Carte c) {
 		if (getRole() == Role.Sherif) {
 			if (getVie() < (getPerso().getVie()+1)) {
@@ -191,10 +207,10 @@ public class Joueur {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	public boolean biereSaloon() {
 		if (getRole() == Role.Sherif) {
 			if (getVie() < (getPerso().getVie()+1)) {
@@ -206,10 +222,10 @@ public class Joueur {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	public void pose(Carte c) {
 		int idx = -1;
 		for (int i = 0 ; i < this.mains.size() ; i++) {
@@ -220,11 +236,11 @@ public class Joueur {
 		this.mains.remove(idx);
 		this.poses.add(c);
 	}
-	
+
 	public boolean peutTirer() {
 		return BangController.getInstance().currentNbBang < getPerso().getLimiteBang();
 	}
-	
+
 	public boolean poseArme(Carte carte) {
 		if (!BangController.getInstance().estArme(carte)) return false;
 		if (armeEquipe == null) {
@@ -235,16 +251,43 @@ public class Joueur {
 			if (armeEquipe.getNom().equals(carte.getNom())) {
 				return false;
 			} else {
-				defausse(armeEquipe);
+				Bukkit.broadcastMessage("§bDéfausse de "+armeEquipe.getNom());
+				defausseArme(armeEquipe);
 				this.armeEquipe = carte;
 				pose(carte);
 				return true;
 			}
 		}
-		
+
 	}
-	
-	
+
+	public void defausseArme(Carte c) {
+		int idx = -1;
+
+		for (int i = 0 ; i < this.poses.size() ; i++) {
+			if (this.poses.get(i).getNom() == c.getNom()) {
+				idx = i;
+			}
+		}
+		
+		this.poses.remove(idx);
+
+		BangController.getInstance().defausse(c);
+	}
+
+	public void removeCartePose(Carte carte) {
+		int idx = -1;
+
+		for (int i = 0 ; i < this.poses.size() ; i++) {
+			if (this.poses.get(i) == carte) {
+				idx = i;
+			}
+		}
+
+		this.poses.remove(idx);
+	}
+
+
 	public boolean carteDejaPose(Carte carte) {
 		for (Carte c : this.poses) {
 			if (carte.getClass() == c.getClass()) {
@@ -253,11 +296,11 @@ public class Joueur {
 		}
 		return false;
 	}
-	
+
 	public boolean isAlive() {
 		return this.vie > 0;
 	}
-	
+
 
 	public Role getRole() {
 		return role;
@@ -275,7 +318,7 @@ public class Joueur {
 			this.vie = this.perso.getVie();
 		}
 		this.visionUp += this.perso.getRangeLunette();
-		
+
 	}
 
 	@Override
@@ -300,7 +343,7 @@ public class Joueur {
 		if (armeEquipe == null) return 0;
 		else return armeEquipe.getDistance();
 	}
-	
-	
+
+
 
 }

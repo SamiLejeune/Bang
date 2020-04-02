@@ -48,6 +48,7 @@ public class BangController implements CommandExecutor {
 
 	public ArrayList<Carte> allCartes;
 	public ArrayList<Carte> pioche;
+	public ArrayList<Carte> defausses;
 	private boolean start;
 	public boolean startTask;
 	private Location[] spots;
@@ -204,6 +205,15 @@ public class BangController implements CommandExecutor {
 		}
 		Bukkit.broadcastMessage("§aLe joueur " + j.getPseudo() + " est éliminé ! Il était " + j.getRole());
 		this.players.remove(idx);
+		
+		for(Carte c : j.getPoses()) {
+			defausse(c);
+		}
+		
+		for(Carte c : j.getMains()) {
+			defausse(c);
+		}
+		this.startTask = false;
 		this.getPlayerServer(j).getInventory().clear();
 		this.getPlayerServer(j).teleport(new Location(world, 183.5, 131, 229.5 ,88,0));
 
@@ -252,7 +262,16 @@ public class BangController implements CommandExecutor {
 		return sherifWin() || horsLaLoiWin() || renegatWin();
 	}
 
-
+	public boolean presenceArmeMain(Joueur j, Carte carte) {
+		for (Carte c : j.getMains() ) {
+			if (c.getClass() == carte.getClass()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
 	public boolean sherifWin() {
 		for (Joueur j : this.players) {
 			if (j.getRole() == Role.HorsLaLoi || j.getRole() == Role.Renegat ) {
@@ -365,9 +384,9 @@ public class BangController implements CommandExecutor {
 		infoD.setDisplayName("§eMes informations");
 		String armeEquipe = "";
 		if (j.armeEquipe == null) {
-			armeEquipe = "§bArme équipé :§9 Colt .45";
+			armeEquipe = "§bArme équipée :§9 Colt .45";
 		} else {
-			armeEquipe = "§bArme équipé :§9 " + j.armeEquipe.getNom(); 
+			armeEquipe = "§bArme équipée :§9 " + j.armeEquipe.getNom(); 
 		}
 		infoD.setLore(Arrays.asList("§bRôle : §9" + j.getRole(),"§bPersonnage : §9" + j.getPerso(),"§bBalles restantes : §9" + j.getVie(),armeEquipe));
 		infoD.addEnchant(Enchantment.DAMAGE_ALL, 200, true);
@@ -456,7 +475,7 @@ public class BangController implements CommandExecutor {
 		this.spotsFixe = new Location[7];
 		spotsFixe[0] = new Location(sender.getServer().getWorld("world"), 183.5, 132, 224.5, 0, 10);
 		spotsFixe[1] = new Location(sender.getServer().getWorld("world"), 178.5, 132, 226.5, -40, 10);
-		spotsFixe[2] = new Location(sender.getServer().getWorld("world"), 177.5, 132, 230.5, -90, 10);
+		spotsFixe[2] = new Location(sender.getServer().getWorld("world"), 177.5, 132, 231.5, -90, 10);
 		spotsFixe[3] = new Location(sender.getServer().getWorld("world"), 180.5, 132, 235.5, -140, 10);
 		spotsFixe[4] = new Location(sender.getServer().getWorld("world"), 185.5, 132, 236.5, 170, 10);
 		spotsFixe[5] = new Location(sender.getServer().getWorld("world"), 189.5, 132, 232.5, 110, 10);
@@ -529,10 +548,35 @@ public class BangController implements CommandExecutor {
 
 		this.pioche = CartesFactory.FACTORY.allCartes("pioche.txt");
 		this.allCartes = CartesFactory.FACTORY.allCartes("pioche.txt");
+		this.defausses = new ArrayList<Carte>();
 		shufflePioche();
-		//	System.out.println(pioche);
+		System.out.println("Init size " + this.pioche.size());
 	}
 
+	public boolean doitMelanger() {
+		return this.pioche.size() < 15;
+	}
+	
+	public void melanger() {
+		ArrayList<Carte> piocheBougePo = new ArrayList<Carte>();
+		for (int i = 0 ; i < 9 ; i++) {
+			piocheBougePo.add(this.pioche.get(i));
+		}
+		Collections.shuffle(defausses);
+		piocheBougePo.addAll(defausses);
+		this.pioche = (ArrayList<Carte>) piocheBougePo.clone();
+		this.defausses.clear();
+	}
+	
+	public int allCarteSize() {
+		int size = this.pioche.size() + this.defausses.size();
+		for(Joueur j : this.players) {
+			size+= j.getPoses().size();
+			size+= j.getMains().size();
+		}
+		return size;
+	}
+	
 	public boolean estArme(Carte c) {
 		return (c.getClass() == Schofield.class ||c.getClass() == Remington.class || c.getClass() == Winchester.class || c.getClass() == Volcanic.class ||
 				c.getClass() == Carabine.class);
@@ -570,18 +614,6 @@ public class BangController implements CommandExecutor {
 		return action;
 	}
 
-	public void partialShuffle() {
-		ArrayList<Carte> list = new ArrayList<Carte>();
-		list.add(this.pioche.get(0));
-		list.add(this.pioche.get(1));
-		list.add(this.pioche.get(2));
-		this.pioche.remove(0);
-		this.pioche.remove(1);
-		this.pioche.remove(2);
-		Collections.shuffle(pioche);
-		list.addAll(pioche);
-		this.pioche = list;
-	}
 
 	public void resetPartialPlateforme(Location l) {
 		Location loc = l.clone();
@@ -791,7 +823,7 @@ public class BangController implements CommandExecutor {
 	}
 
 	public void defausse(Carte c) {
-		this.pioche.add(c);
+		this.defausses.add(c);
 	}
 
 	public void setPlugin(JavaPlugin plugin) {

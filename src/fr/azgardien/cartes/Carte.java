@@ -8,7 +8,7 @@ public abstract class Carte  implements ContreAttaque
 {
 	@Override
 	public String toString() {
-		return "Carte [ nom=" + nom + "]";
+		return "Carte [val=" + val + ", couleur=" + couleur + ", nom=" + nom + "]";
 	}
 
 

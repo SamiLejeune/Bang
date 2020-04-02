@@ -37,6 +37,7 @@ public class Bang extends Carte
 			cible.openInventory(action);
 		} else if (target.finAction == true && target.contreAction == false) {
 			target.bang(source);
+			target.tueur = source;
 		}
 		
 	}

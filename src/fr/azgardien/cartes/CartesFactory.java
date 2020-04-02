@@ -26,11 +26,9 @@ public class CartesFactory {
 			try {
 				while((text = in.readLine())!= null) {
 					String q = in.readLine();
-					int qte = Integer.parseInt(q);
-					for (int i = 0 ; i < qte ; i++) {
-						Carte p = createCarte(text);
-						cartes.add(p);
-					}
+					String couleur = in.readLine();
+					Carte p = createCarte(text,couleur,q);
+					cartes.add(p);			
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -44,11 +42,21 @@ public class CartesFactory {
 		return cartes;
 	}
 	
-	public Carte createCarte(String nom) {
+	public Carte createCarte(String nom,String couleur, String hauteur) {
 		 try {
+			 	Couleur coul = null;
+			 	if (couleur.equals("C")) {
+			 		coul = Couleur.Coeur;
+			 	} else if (couleur.equals("T")) {
+			 		coul = Couleur.Trèfle;
+			 	} else if (couleur.equals("P")) {
+			 		coul = Couleur.Pique;
+			 	} else {
+			 		coul = Couleur.Carreau;
+			 	}
 				Class<?> c = Class.forName(nom);
 				Constructor<?> constructor = c.getConstructor(String.class, Couleur.class);
-				Carte carte = (Carte) constructor.newInstance("A",Couleur.Pique);
+				Carte carte = (Carte) constructor.newInstance(hauteur,coul);
 				return carte;
 			} catch (Exception e) {
 				e.printStackTrace();
