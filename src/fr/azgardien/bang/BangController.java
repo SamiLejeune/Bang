@@ -178,6 +178,7 @@ public class BangController implements CommandExecutor {
 		for (Joueur j : players) {
 			Player p = getPlayerServer(j);
 			p.teleport(new Location(world, 183.5, 131, 229.5 ,88,0));
+			p.getInventory().clear();
 		}
 		resetScoreBoard();
 	}

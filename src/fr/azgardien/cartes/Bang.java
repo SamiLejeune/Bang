@@ -38,6 +38,8 @@ public class Bang extends Carte
 		} else if (target.finAction == true && target.contreAction == false) {
 			target.bang(source);
 			target.tueur = source;
+		} else {
+			Bukkit.broadcastMessage("§a"+ target.getPseudo() + " défausse un BANG et ne perd pas de point de vie");
 		}
 		
 	}

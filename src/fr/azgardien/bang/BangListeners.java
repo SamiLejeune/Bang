@@ -133,13 +133,17 @@ public class BangListeners implements Listener {
 				ItemStack item = inv.getItem(17);
 				String actionCarte = item.getItemMeta().getDisplayName().substring(2);
 				Carte sourceAction = BangController.getInstance().getType(actionCarte);
+				System.out.println(sourceAction);
 				Carte c = BangController.getInstance().isGameMaterial(type);
+				System.out.println(c);
 				if (sourceAction.carteQuiContre().getNom().equals(c.getNom())) {
 					// on utilise la carte
 					joueur.contreAction = true;
 					joueur.finAction = true;
 					c.appliquerEffet(null, joueur);	
-					BangController.getInstance().currentNbBang++;
+					if (sourceAction.getClass() == Bang.class) {
+						BangController.getInstance().currentNbBang++;
+					}	
 					joueur.defausse(c);			
 					player.closeInventory();
 					joueur.contreAction = false;
@@ -181,11 +185,9 @@ public class BangListeners implements Listener {
 					BangController.getInstance().resetPartialPlateforme(joueur.getLocation());
 					BangController.getInstance().currentJoueur = BangController.getInstance().nextJoueur();
 					BangController.getInstance().currentJoueur.piocheTour();
-					System.out.println(BangController.getInstance().allCarteSize());
 					if (BangController.getInstance().doitMelanger()) {
 						BangController.getInstance().melanger();						
 					}
-					System.out.println(BangController.getInstance().getPioche());
 					BangController.getInstance().currentNbBang = 0;
 					BangController.getInstance().affichageCurrent();
 					player.closeInventory();
@@ -215,6 +217,7 @@ public class BangListeners implements Listener {
 					} else if (c.getClass() == Rate.class) {
 						//Nothing
 					} else {
+						System.out.println("ici");
 						c.appliquerEffet(BangController.getInstance().getJoueur(player),null);
 					}
 					if (BangController.getInstance().estArme(c) || c.getClass() == Biere.class || c.getClass() == Lunette.class) {

@@ -1,11 +1,15 @@
 package fr.azgardien.cartes;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import fr.azgardien.bang.BangController;
 import fr.azgardien.bang.Joueur;
 
 public class Indiens extends Carte
@@ -23,7 +27,23 @@ public class Indiens extends Carte
     @Override
     public void appliquerEffet(Joueur source,Joueur target)
     {
-        //TODO Auto-generated method stub
+    	if (target == null) {
+    		Bukkit.broadcastMessage("§a"+source.getPseudo() + " pose un indien");
+    		for (Joueur j : BangController.getInstance().players) {
+				if (source != j) {
+					BangController controller = BangController.getInstance();
+					j.actionRecu = this;
+					source.joueurAttaque = j;
+					j.sourceAction = source;
+					Player cible = controller.getPlayerServer(j);
+					Inventory action = controller.actionInventory(source, j, getNom());
+					cible.openInventory(action);
+				}
+			}
+		} else if (target.finAction == true && target.contreAction == false) {
+			target.bang(source);
+			target.tueur = source;
+		} 
     }
 
 	@Override
@@ -39,8 +59,7 @@ public class Indiens extends Carte
 
 	@Override
 	public Carte carteQuiContre() {
-		// TODO Auto-generated method stub
-		return null;
+		return BangController.getInstance().getType("Bang");
 	}
 
 }
