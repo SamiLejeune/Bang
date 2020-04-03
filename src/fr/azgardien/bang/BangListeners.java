@@ -31,8 +31,11 @@ import fr.azgardien.cartes.Carte;
 import fr.azgardien.cartes.Couleur;
 import fr.azgardien.cartes.CoupDeFoudre;
 import fr.azgardien.cartes.Duel;
+import fr.azgardien.cartes.Dynamite;
 import fr.azgardien.cartes.Lunette;
 import fr.azgardien.cartes.Magasin;
+import fr.azgardien.cartes.Mustang;
+import fr.azgardien.cartes.Planque;
 import fr.azgardien.cartes.Prison;
 import fr.azgardien.cartes.Rate;
 
@@ -58,20 +61,21 @@ public class BangListeners implements Listener {
 		Action action = event.getAction();
 		ItemStack current = event.getItem();
 		if(current == null) return;
-		if (BangController.getInstance().getPlayers() == null) return;
+		BangController instance = BangController.getInstance();
+		if (instance.getPlayers() == null) return;
 		if (current.getType() == Material.COMPASS) {
 			if (current.getItemMeta().getDisplayName().equalsIgnoreCase("§bInteraction")) {
 				Inventory interaction = this.controller.playerInventory(this.controller.getJoueur(player));
 				player.openInventory(interaction);
 			}
 		} else if (current.getType() == Material.ARROW) {
-			Carte c = BangController.getInstance().getJoueur(player).currentAction;
+			Carte c = instance.getJoueur(player).currentAction;
 			if(c!= null) {
-				Joueur source = BangController.getInstance().getJoueur(player);
-				Joueur cible = BangController.getInstance().getJoueur(getTargetPlayer(player));
+				Joueur source = instance.getJoueur(player);
+				Joueur cible = instance.getJoueur(getTargetPlayer(player));
 				if (cible != null) {
 					if (c.getClass() == Bang.class) {
-						if (BangController.getInstance().reach(source, cible)) {
+						if (instance.reach(source, cible)) {
 							c.appliquerEffet(source,cible);				
 						} else {
 							source.pioche(c);
@@ -79,22 +83,23 @@ public class BangListeners implements Listener {
 						}
 					} else if (c.getClass() == Braquage.class) {
 						
-						if (BangController.getInstance().peutBraquage(source, cible)) {
-							Bukkit.broadcastMessage("§a"+source.getPseudo() + " regarde le jeu de " + cible.getPseudo() + " pour un braquage");
-							player.openInventory(BangController.getInstance().visionJoueur(cible,"Braquage"));
+						if (instance.peutBraquage(source, cible)) {
+							player.openInventory(instance.visionJoueur(cible,"Braquage"));
+							instance.defausse(c);
 						} else {
 							player.sendMessage("§cVous ne pouvez pas le braquer");
 						}
 						
 					} else if (c.getClass() == CoupDeFoudre.class) {
-						Bukkit.broadcastMessage("§a"+source.getPseudo() + " regarde le jeu de " + cible.getPseudo() + " pour un coup de foudre");
-						player.openInventory(BangController.getInstance().visionJoueur(cible,"Coup de foudre"));
+						player.openInventory(instance.visionJoueur(cible,"Coup de foudre"));
+						instance.defausse(c);
 					} else if (c.getClass() == Duel.class) {
 						Bukkit.broadcastMessage("§a"+source.getPseudo() + " duel " + cible.getPseudo());
 						c.appliquerEffet(source, cible);
+						instance.duelCurrentJoueur = cible;
 						source.defausse(c);
 						source.sourceAction = cible;
-						BangController.getInstance().duelFin = false;
+						instance.duelFin = false;
 					} else if (c.getClass() == Prison.class){
 						c.appliquerEffet(source, cible);
 					}
@@ -113,11 +118,7 @@ public class BangListeners implements Listener {
 		for (Carte c : joueur.getMains()) {
 			def.setItem(i++, c.representation());
 		}
-		for (Carte c : joueur.getPoses()) {
-			if (!BangController.getInstance().estArme(c)) {
-				def.setItem(i++, c.representation());
-			}		
-		}
+
 		
 		ItemStack retour = new ItemStack(Material.ARROW);
 		ItemMeta retourD = retour.getItemMeta();
@@ -139,7 +140,7 @@ public class BangListeners implements Listener {
 		if(current == null) return;
 		BangController instance = BangController.getInstance();
 		if (instance.getPlayers() == null) return;
-		
+		System.out.println(instance.defausses);
 		Joueur joueur = instance.getJoueur(player);
 		
 		if(instance.lanceurMagasin == null) {
@@ -174,6 +175,7 @@ public class BangListeners implements Listener {
 						Player joueurFace = BangController.getInstance().getPlayerServer(j);
 						Bukkit.broadcastMessage("§b"+joueur.getPseudo() + " pose un bang");
 						joueurFace.openInventory(BangController.getInstance().actionInventory(joueur, j, "Duel"));
+						instance.duelCurrentJoueur = j;
 						joueur.defausse(c);
 						player.closeInventory();
 					} else {
@@ -234,6 +236,28 @@ public class BangListeners implements Listener {
 				} else {					
 					instance.resetPartialPlateforme(joueur.getLocation());
 					instance.currentJoueur = instance.nextJoueur();
+					if (instance.currentJoueur.aDynamite == true) {
+						Bukkit.broadcastMessage("§bPioche d'une carte pour la dynamite..");
+						Carte carteDynamite = instance.getCarte();
+						Bukkit.broadcastMessage("§b" + instance.currentJoueur.getPseudo() + " tire : " + carteDynamite.getNom() + " ["+carteDynamite.getVal() + " de " + carteDynamite.getCouleur() + "]");
+						instance.defausse(carteDynamite);
+						Dynamite dyn = new Dynamite("", Couleur.Carreau);
+						Carte poseDynamite = instance.currentJoueur.getFromPose(dyn.representation().getType());
+						instance.resetPartialPlateforme(instance.currentJoueur.getLocation());
+						if (instance.faitExploser(carteDynamite)) {
+							instance.defausse(poseDynamite);
+							Bukkit.broadcastMessage("§bLa dynamite explose et le joueur perd 3 points de vie");
+							instance.currentJoueur.damage(3);
+							instance.removeDynamite(instance.currentJoueur);
+							instance.currentJoueur.aDynamite = false;
+						} else {
+							Bukkit.broadcastMessage("§bLa dynamite n'explose pas et passe au prochain joueur");
+							instance.removeDynamite(instance.currentJoueur);
+							instance.setDynamite(instance.nextDynamite());
+							instance.nextDynamite().posePrison(poseDynamite);
+							instance.nextDynamite().aDynamite = true;
+						}
+					}
 					if (!instance.currentJoueur.estEnPrison) {
 						instance.currentJoueur.piocheTour();
 					} else {
@@ -243,8 +267,8 @@ public class BangListeners implements Listener {
 							Bukkit.broadcastMessage("§b" + instance.currentJoueur.getPseudo() + " tire : " + cartePrison.getNom() + " ["+cartePrison.getVal() + " de " + cartePrison.getCouleur() + "]");
 							Prison prison = new Prison("", Couleur.Carreau);
 							Carte posePrison = instance.currentJoueur.getFromPose(prison.representation().getType());
-							System.out.println("Carte prison ok");
 							instance.defausse(posePrison);
+							instance.defausse(cartePrison);
 							instance.resetPartialPlateforme(instance.currentJoueur.getLocation());
 							instance.resetPrison(instance.currentJoueur.getLocation());
 							instance.currentJoueur.estEnPrison = false;
@@ -255,6 +279,25 @@ public class BangListeners implements Listener {
 								}
 							} else {
 								Bukkit.broadcastMessage("§b" + instance.currentJoueur.getPseudo() + " sort de prison !");
+								instance.currentJoueur.piocheTour();
+							}
+							if (instance.currentJoueur.aDynamite == true) {
+								Bukkit.broadcastMessage("§bPioche d'une carte pour la dynamite..");
+								Carte carteDynamite = instance.getCarte();
+								Bukkit.broadcastMessage("§b" + instance.currentJoueur.getPseudo() + " tire : " + carteDynamite.getNom() + " ["+carteDynamite.getVal() + " de " + carteDynamite.getCouleur() + "]");
+								instance.defausse(carteDynamite);
+								instance.resetPartialPlateforme(instance.currentJoueur.getLocation());
+								if (instance.faitExploser(carteDynamite)) {
+									Bukkit.broadcastMessage("§bLa dynamite explose et le joueur perd 3 points de vie");
+									instance.currentJoueur.damage(3);
+									instance.removeDynamite(instance.currentJoueur);
+									instance.currentJoueur.aDynamite = false;
+								} else {
+									Bukkit.broadcastMessage("§bLa dynamite n'explose pas et passe au prochain joueur");
+									instance.removeDynamite(instance.currentJoueur);
+									instance.setDynamite(instance.nextDynamite());
+									instance.nextDynamite().aDynamite = true;
+								}
 							}
 							
 						} while(instance.currentJoueur.estEnPrison == true);															
@@ -296,7 +339,7 @@ public class BangListeners implements Listener {
 					}  else {
 						c.appliquerEffet(instance.getJoueur(player),null);
 					}
-					if (instance.estArme(c) || c.getClass() == Biere.class || c.getClass() == Lunette.class ||c.getClass() == Rate.class ) {
+					if (instance.estArme(c) || c.getClass() == Biere.class || c.getClass() == Lunette.class ||c.getClass() == Rate.class ||c.getClass() == Mustang.class || c.getClass() == Planque.class ||c.getClass() == Dynamite.class ) {
 						
 					} else if (c.getClass() == Magasin.class) {
 						joueur.defausse(c);
@@ -400,12 +443,10 @@ public class BangListeners implements Listener {
 			if (type == Material.ENDER_PEARL) {
 				Carte carte = joueur.joueurBraque.getRandomFromMain();
 				joueur.pioche(carte);
-				Bukkit.broadcastMessage("§b"+joueur.getPseudo() + " récupère : " + carte.getNom() );
 			} else {
 				Carte carte = joueur.joueurBraque.getFromPose(type);
 				joueur.pioche(carte);
 				joueur.joueurBraque.updateRemoveTargettable(carte);
-				Bukkit.broadcastMessage("§b"+joueur.getPseudo() + " récupère : " + carte.getNom() );
 			}
 			
 			Braquage braquage = new Braquage("", Couleur.Carreau);
@@ -422,10 +463,12 @@ public class BangListeners implements Listener {
 			if (type == Material.ENDER_PEARL) {
 				Carte carte = joueur.joueurBraque.getRandomFromMain();
 				Bukkit.broadcastMessage("§b"+joueur.joueurBraque.getPseudo() + " perd " + carte.getNom() );
+				instance.defausse(carte);
 			} else {
 				Carte carte = joueur.joueurBraque.getFromPose(type);
 				joueur.joueurBraque.updateRemoveTargettable(carte);
 				Bukkit.broadcastMessage("§b"+joueur.joueurBraque.getPseudo() + " perd " + carte.getNom() );
+				instance.defausse(carte);
 			}
 			
 			CoupDeFoudre foudre = new CoupDeFoudre("", Couleur.Carreau);
@@ -445,7 +488,6 @@ public class BangListeners implements Listener {
 		Inventory inv = event.getInventory();
 		BangController instance = BangController.getInstance();
 		Joueur j = instance.getJoueur(player);
-		System.out.println("Choix magasin = " + j.choixMagasin);
 		
 		if (j != null) {	
 			
@@ -459,10 +501,10 @@ public class BangListeners implements Listener {
 					j.currentAction = null;
 					j.sourceAction = null;
 					j.joueurAttaque = null;
+					j.getPerso().limiteBang = 1;
 				}
 				if (instance.currentMagasin != null) {
 					if (inv.getName().equalsIgnoreCase("§8Magasin") && j.choixMagasin == false) {
-						System.out.println("On est la");
 						try {
 							Carte random = instance.randomCarteMagasin();
 							Bukkit.broadcastMessage("§b"+j.getPseudo() + " prend " + random.getNom());
@@ -486,15 +528,20 @@ public class BangListeners implements Listener {
 				}
 				
 			} else {
-				if (instance.duelPremature == true) {
+				System.out.println("Duel current " + instance.duelCurrentJoueur);
+				if (instance.duelPremature == true && instance.duelCurrentJoueur == j) {
+					System.out.println("ici duel premature qui fait --");
 					ItemStack actionSource = inv.getItem(16);
 					String nomSource = actionSource.getItemMeta().getDisplayName().substring(2);
 					Joueur jAction = BangController.getInstance().getJoueur(nomSource);
 					j.bang(jAction);
-					BangController.getInstance().currentNbBang--;
+					if (BangController.getInstance().currentNbBang > 0) BangController.getInstance().currentNbBang--;
+				
 					instance.duelPremature = false;
+					instance.duelFin = true;
+					instance.duelCurrentJoueur = null;
 					instance.resetAction();
-				}			
+				} 
 			}
 
 			

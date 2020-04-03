@@ -52,7 +52,14 @@ public abstract class Personnage {
 		return nom;
 	}
 
-
+	public void setMustang() {
+		this.distance++;
+	}
+	
+	public void removeMustang() {
+		this.distance--;
+	}
+	
 	public String getDescription() {
 		return description;
 	}

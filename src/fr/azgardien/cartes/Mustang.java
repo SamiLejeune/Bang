@@ -1,11 +1,13 @@
 package fr.azgardien.cartes;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import fr.azgardien.bang.BangController;
 import fr.azgardien.bang.Joueur;
 
 public class Mustang extends Carte
@@ -23,7 +25,15 @@ public class Mustang extends Carte
     @Override
     public void appliquerEffet(Joueur source,Joueur target)
     {
-        //TODO Auto-generated method stub
+    	BangController.getInstance().getPlayerServer(source).closeInventory();
+        if (source.estPose(this)==false) {
+        	Bukkit.broadcastMessage("§b"+source.getPseudo() + " pose une mustang");
+        	source.getPerso().setMustang();
+        	source.pose(this);
+        } else {
+        	BangController.getInstance().getPlayerServer(source).sendMessage("§cMustang déjà posée");
+        }
+        BangController.getInstance().getPlayerServer(source).openInventory(BangController.getInstance().playerInventory(source));
     }
 
 	@Override

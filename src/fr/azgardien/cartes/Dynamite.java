@@ -25,7 +25,12 @@ public class Dynamite extends Carte
     @Override
     public void appliquerEffet(Joueur source,Joueur target)
     {
-    	
+    	BangController.getInstance().getPlayerServer(source).closeInventory();
+    	Bukkit.broadcastMessage("§a" + source.getPseudo() + " pose une dynamite");
+    	BangController.getInstance().setDynamite(source);
+    	source.aDynamite = true;
+    	source.pose(this);
+    	BangController.getInstance().getPlayerServer(source).openInventory(BangController.getInstance().playerInventory(source));
     }
 
 	@Override

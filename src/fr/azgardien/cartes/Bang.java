@@ -27,14 +27,37 @@ public class Bang extends Carte
 	@Override
 	public void appliquerEffet(Joueur source, Joueur target) {
 		if (target.finAction == false && target.contreAction == false) {
-			Bukkit.broadcastMessage("§a"+source.getPseudo() + " a BANG " + target.getPseudo());	
-			BangController controller = BangController.getInstance();
-			target.actionRecu = this;
-			source.joueurAttaque = target;
-			target.sourceAction = source;
-			Player cible = controller.getPlayerServer(target);
-			Inventory action = controller.actionInventory(source, target, getNom());
-			cible.openInventory(action);
+			if (target.aPlanque == true) {
+				System.out.println("Il a une planque");
+				Bukkit.broadcastMessage("§b" + target.getPseudo() + " a une planque !");
+				BangController instance = BangController.getInstance();
+				Carte cartePlanque = instance .getCarte();
+				Bukkit.broadcastMessage("§b" + target.getPseudo() + " tire : " + cartePlanque.getNom() + " ["+cartePlanque.getVal() + " de " + cartePlanque.getCouleur() + "]");
+				instance.defausse(cartePlanque);
+				System.out.println("Apres action " + BangController.getInstance().allCarteSize());
+				System.out.println(instance.defausses);
+				if (cartePlanque.getCouleur() == Couleur.Coeur) {											
+					Bukkit.broadcastMessage("§a"+target.getPseudo() + " évite le bang");	
+				} else {
+					Bukkit.broadcastMessage("§a"+source.getPseudo() + " a BANG " + target.getPseudo());	
+					BangController controller = BangController.getInstance();
+					target.actionRecu = this;
+					source.joueurAttaque = target;
+					target.sourceAction = source;
+					Player cible = controller.getPlayerServer(target);
+					Inventory action = controller.actionInventory(source, target, getNom());
+					cible.openInventory(action);
+				}
+			} else {
+				Bukkit.broadcastMessage("§a"+source.getPseudo() + " a BANG " + target.getPseudo());	
+				BangController controller = BangController.getInstance();
+				target.actionRecu = this;
+				source.joueurAttaque = target;
+				target.sourceAction = source;
+				Player cible = controller.getPlayerServer(target);
+				Inventory action = controller.actionInventory(source, target, getNom());
+				cible.openInventory(action);
+			}			
 		} else if (target.finAction == true && target.contreAction == false) {
 			target.bang(source);
 			target.tueur = source;

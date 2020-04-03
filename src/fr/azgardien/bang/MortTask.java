@@ -13,7 +13,7 @@ public class MortTask extends BukkitRunnable {
 		if (BangController.getInstance().startTask) {
 			ArrayList<Joueur> list = BangController.getInstance().getPlayers();
 			for (Joueur j : list) {
-				if (j.getVie() == 0) {
+				if (j.getVie() <= 0) {
 					BangController.getInstance().resetScoreBoard(BangController.getInstance().getPlayerServer(j));
 					BangController.getInstance().exitPlayer(j);				
 					if (j.getRole() == Role.HorsLaLoi) {
@@ -27,6 +27,7 @@ public class MortTask extends BukkitRunnable {
 							j.tueur.clear();
 						}
 					}
+					System.out.println(BangController.getInstance().defausses);
 					System.out.println("Apres mort " + BangController.getInstance().allCarteSize());
 				}
 			}

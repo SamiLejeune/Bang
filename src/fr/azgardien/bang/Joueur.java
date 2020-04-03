@@ -13,7 +13,10 @@ import org.bukkit.inventory.ItemStack;
 import fr.azgardien.cartes.Carabine;
 import fr.azgardien.cartes.Carte;
 import fr.azgardien.cartes.Couleur;
+import fr.azgardien.cartes.Dynamite;
 import fr.azgardien.cartes.Lunette;
+import fr.azgardien.cartes.Mustang;
+import fr.azgardien.cartes.Planque;
 import fr.azgardien.cartes.Prison;
 import fr.azgardien.cartes.Remington;
 import fr.azgardien.cartes.Schofield;
@@ -48,6 +51,9 @@ public class Joueur {
 	public boolean choixMagasin;
 	
 	public boolean estEnPrison;
+	public boolean aDynamite;
+	
+	public boolean aPlanque;
 	
 	public ArrayList<Carte> getMains() {
 		return mains;
@@ -87,6 +93,8 @@ public class Joueur {
 		this.armeEquipe = null;
 		this.choixMagasin = false;
 		this.estEnPrison = false;
+		this.aDynamite = false;
+		this.aPlanque = false;
 	}
 
 
@@ -175,7 +183,7 @@ public class Joueur {
 
 	public boolean estPose(Carte carte) {
 		for (Carte c : this.poses) {
-			if (carte.getNom().equals(carte.getNom())) {
+			if (c.getNom().equals(carte.getNom())) {
 				return true;
 			}
 		}
@@ -356,14 +364,21 @@ public class Joueur {
 			if (this.perso.getClass() != WillyLeKid.class ) {
 				this.perso.limiteBang = 1;
 			}
+			System.out.println("Limite bang " + this.perso.limiteBang);
 		} else if (carte.getClass() == Lunette.class) {
 			this.removeLunette();
 		} else if (carte.getClass() == Prison.class) {
-			System.out.println("On a enlevé prison  de " + this);
 			this.estEnPrison = false;
 			BangController.getInstance().resetPrison(getLocation());
+		} else if (carte.getClass() == Mustang.class) {
+			getPerso().removeMustang();
+		} else if (carte.getClass() == Planque.class) {
+			this.aPlanque = false;
+		} else if (carte.getClass() == Dynamite.class) {
+			this.aDynamite = false;
+			BangController.getInstance().removeDynamite(this);
 		}
-		
+		 
 	}
 	
 	public void removeCartePose(Carte carte) {

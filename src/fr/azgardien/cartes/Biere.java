@@ -32,6 +32,7 @@ public class Biere extends Carte
 				Player p = BangController.getInstance().getPlayerServer(source);
 				p.sendMessage("§c Bière et saloon interdit en 1v1");
 				source.pioche(this);
+				source.damage(1);
 			} else {
 				BangController.getInstance().getPlayerServer(source).closeInventory();	
 				Bukkit.broadcastMessage("§a"+source.getPseudo() + " boit une bière pour regagner une vie");

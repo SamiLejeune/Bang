@@ -30,6 +30,7 @@ import fr.azgardien.cartes.Carabine;
 import fr.azgardien.cartes.Carte;
 import fr.azgardien.cartes.CartesFactory;
 import fr.azgardien.cartes.Couleur;
+import fr.azgardien.cartes.Dynamite;
 import fr.azgardien.cartes.Lunette;
 import fr.azgardien.cartes.Remington;
 import fr.azgardien.cartes.Schofield;
@@ -56,9 +57,7 @@ public class BangController implements CommandExecutor {
 	public void removeCarteMagasin(Carte c) {
 		int idx = -1;
 		for (int i = 0 ; i < magasins.size() ; i++) {
-			System.out.println("Parcours remove " + magasins.get(i) + " et " + c);
 			if (magasins.get(i) == c) {
-				System.out.println("ici parcours");
 				idx = i;
 			}
 		}
@@ -87,7 +86,6 @@ public class BangController implements CommandExecutor {
 		if (max < 0) {
 			max = 0;
 		}
-		System.out.println("Random magasin max indice " + max);
 		int alea = random.nextInt(max + 1);
 		return this.magasins.get(alea);
 	}
@@ -96,6 +94,10 @@ public class BangController implements CommandExecutor {
 	public boolean startTask;
 	private Location[] spots;
 	private Location[] spotsFixe;
+	public Location[] getSpotsFixe() {
+		return spotsFixe;
+	}
+
 	private Role[] current;
 	public ArrayList<Joueur> players;
 	private ArrayList<Personnage> personnages;
@@ -106,6 +108,7 @@ public class BangController implements CommandExecutor {
 	public Joueur lanceurMagasin;
 	public boolean duelFin;
 	public boolean duelPremature;
+	public Joueur duelCurrentJoueur;
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String arg2, String[] args) {
@@ -246,6 +249,22 @@ public class BangController implements CommandExecutor {
 		return null;
 	}
 
+	public Joueur nextDynamite() {
+		for (int i = 0 ; i < this.players.size() ; i++) {
+			if (this.players.get(i) == this.currentJoueur) {
+				if (i == 0) {
+					Joueur j = this.players.get(this.players.size()-1); 
+					return j;
+				} else {
+					Joueur j = this.players.get(i-1);
+					return j;
+				}
+
+			}
+		}
+		return null;
+	}
+	
 	public void game() {
 		this.currentJoueur = sherif();
 		currentJoueur.piocheTour();
@@ -333,6 +352,20 @@ public class BangController implements CommandExecutor {
 		loc.setY(loc.getY()+3);
 		Block b = loc.getBlock();
 		b.setType(Material.SLIME_BLOCK);
+	}
+	
+	public void setDynamite(Joueur j) {
+		Location loc = j.getLocation().clone();
+		loc.setY(loc.getY()+4);
+		Block b = loc.getBlock();
+		b.setType(Material.TNT);
+	}
+	
+	public void removeDynamite(Joueur j) {
+		Location loc = j.getLocation().clone();
+		loc.setY(loc.getY()+4);
+		Block b = loc.getBlock();
+		b.setType(Material.AIR);
 	}
 
 	private void distribution() {
@@ -568,6 +601,7 @@ public class BangController implements CommandExecutor {
 		duelFin = true;
 		duelPremature = false;
 		currentNbBang = 0;
+		duelCurrentJoueur = null;
 
 		for(Player p : this.world.getPlayers()) {
 			p.setGameMode(GameMode.ADVENTURE);
@@ -782,6 +816,23 @@ public class BangController implements CommandExecutor {
 		return null;
 	}
 
+	public boolean faitExploser(Carte c) {
+		if (c.getCouleur() == Couleur.Pique) {
+			try {
+				int val = Integer.parseInt(c.getVal());
+				if (val >= 2 && val <=9) {
+					return true;
+				} else {
+					return false;
+				}
+			} catch(Exception e) {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+	
 	public void resetAllPlateforme(Location l) {
 		Location loc = l.clone();
 		loc.setY(loc.getY()-1);
@@ -793,6 +844,9 @@ public class BangController implements CommandExecutor {
 		loc.setY(loc.getY()+1);
 		Block b3 = loc.getBlock();
 		b3.setType(Material.AIR);
+		loc.setY(loc.getY()+1);
+		Block b4 = loc.getBlock();
+		b4.setType(Material.AIR);
 
 	}
 
@@ -906,7 +960,6 @@ public class BangController implements CommandExecutor {
 	public Inventory visionJoueur(Joueur j, String action) {
 
 		Inventory vision = Bukkit.createInventory(null, 36,"§8Vision");
-		System.out.println(vision);
 		ItemStack cache = new ItemStack(Material.ENDER_PEARL);
 		ItemMeta cacheD = cache.getItemMeta();
 		cacheD.setDisplayName("§eCarte cachée");
