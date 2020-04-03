@@ -14,6 +14,7 @@ import fr.azgardien.cartes.Carabine;
 import fr.azgardien.cartes.Carte;
 import fr.azgardien.cartes.Couleur;
 import fr.azgardien.cartes.Lunette;
+import fr.azgardien.cartes.Prison;
 import fr.azgardien.cartes.Remington;
 import fr.azgardien.cartes.Schofield;
 import fr.azgardien.cartes.Volcanic;
@@ -42,10 +43,11 @@ public class Joueur {
 	public Joueur tueur;
 	public Carte armeEquipe;
 	
-	
 	public Joueur joueurBraque;
 	
 	public boolean choixMagasin;
+	
+	public boolean estEnPrison;
 	
 	public ArrayList<Carte> getMains() {
 		return mains;
@@ -84,6 +86,7 @@ public class Joueur {
 		this.poses = new ArrayList<Carte>();
 		this.armeEquipe = null;
 		this.choixMagasin = false;
+		this.estEnPrison = false;
 	}
 
 
@@ -279,6 +282,23 @@ public class Joueur {
 	}
 
 	
+	public void posePrison(Carte c) {
+		this.poses.add(c);
+	}
+	
+	public Carte donnePrison() {
+		int idx = -1;
+		for (int i = 0 ; i < this.mains.size() ; i++) {
+			if (this.mains.get(i).getNom().equals("Prison")) {
+				idx = i;
+			}
+		}
+		Carte c = this.mains.get(idx);
+		this.mains.remove(idx);
+		return  c;
+	}
+	
+	
 	public Carte getRandomFromMain() {
 		Random random = new Random();
 		int max = this.mains.size()-1;
@@ -338,6 +358,10 @@ public class Joueur {
 			}
 		} else if (carte.getClass() == Lunette.class) {
 			this.removeLunette();
+		} else if (carte.getClass() == Prison.class) {
+			System.out.println("On a enlevé prison  de " + this);
+			this.estEnPrison = false;
+			BangController.getInstance().resetPrison(getLocation());
 		}
 		
 	}

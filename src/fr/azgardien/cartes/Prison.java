@@ -1,12 +1,16 @@
 package fr.azgardien.cartes;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import fr.azgardien.bang.BangController;
 import fr.azgardien.bang.Joueur;
+import fr.azgardien.bang.Role;
 
 public class Prison extends Carte
 {
@@ -23,7 +27,16 @@ public class Prison extends Carte
     @Override
     public void appliquerEffet(Joueur source,Joueur target)
     {
-        //TODO Auto-generated method stub
+    	if (target.getRole() == Role.Sherif) {
+    		Player p = BangController.getInstance().getPlayerServer(source);
+			p.sendMessage("§cLe shérif ne peut pas être en prison");
+    	} else {
+    		Bukkit.broadcastMessage("§a"+target.getPseudo() + " est en prison");
+        	BangController.getInstance().setPrison(target);
+        	target.estEnPrison = true;
+        	target.posePrison(source.donnePrison());
+    	}
+    	
     }
 
 	@Override

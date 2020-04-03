@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import fr.azgardien.bang.BangController;
 import fr.azgardien.bang.Joueur;
 
 public class Duel extends Carte
@@ -23,7 +24,8 @@ public class Duel extends Carte
     @Override
     public void appliquerEffet(Joueur source,Joueur target)
     {
-        //TODO Auto-generated method stub
+        BangController controller = BangController.getInstance();
+        controller.getPlayerServer(target).openInventory(controller.actionInventory(source, target, "Duel"));
     }
 
 	@Override
@@ -39,8 +41,7 @@ public class Duel extends Carte
 
 	@Override
 	public Carte carteQuiContre() {
-		// TODO Auto-generated method stub
-		return null;
+		return BangController.getInstance().getType("Bang");
 	}
 
 }

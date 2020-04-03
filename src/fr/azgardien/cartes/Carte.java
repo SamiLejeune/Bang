@@ -13,6 +13,11 @@ public abstract class Carte  implements ContreAttaque
 
 
 	private String val;
+	public String getVal() {
+		return val;
+	}
+
+
 	private Couleur couleur;
 	private String description;
 	private String nom;

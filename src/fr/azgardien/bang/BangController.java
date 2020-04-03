@@ -84,6 +84,10 @@ public class BangController implements CommandExecutor {
 	public Carte randomCarteMagasin() {
 		Random random = new Random();
 		int max = this.magasins.size()-1;
+		if (max < 0) {
+			max = 0;
+		}
+		System.out.println("Random magasin max indice " + max);
 		int alea = random.nextInt(max + 1);
 		return this.magasins.get(alea);
 	}
@@ -100,7 +104,8 @@ public class BangController implements CommandExecutor {
 	public int currentNbBang;
 	public Joueur currentMagasin;
 	public Joueur lanceurMagasin;
-
+	public boolean duelFin;
+	public boolean duelPremature;
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String arg2, String[] args) {
@@ -551,9 +556,17 @@ public class BangController implements CommandExecutor {
 		return true;
 	}
 
+	public void resetAction() {
+		for (Joueur j : this.players) {
+			j.sourceAction = null;
+		}
+	}
+	
 	private void init(CommandSender sender) {
 		start = true;
 		startTask = false;
+		duelFin = true;
+		duelPremature = false;
 		currentNbBang = 0;
 
 		for(Player p : this.world.getPlayers()) {
@@ -611,8 +624,11 @@ public class BangController implements CommandExecutor {
 		//reset emplacement
 		for (Location l : this.spotsFixe) {
 			resetAllPlateforme(l);
+			resetPrison(l);
 		}
 
+	
+		
 		//clear players inventory
 		for (Player p : sender.getServer().getWorld("world").getPlayers()) {
 			p.getInventory().clear();
@@ -644,6 +660,31 @@ public class BangController implements CommandExecutor {
 		System.out.println("Init size " + this.pioche.size());
 	}
 
+	
+	public ArrayList<Location> getBarriere(Location joueur) {
+		ArrayList<Location> barriere = new ArrayList<Location>();
+
+		barriere.add(new Location(this.world, joueur.getX()+1, joueur.getY(), joueur.getZ()));
+		barriere.add(new Location(this.world, joueur.getX()-1, joueur.getY(), joueur.getZ()));
+		barriere.add(new Location(this.world, joueur.getX(), joueur.getY(), joueur.getZ()+1));
+		barriere.add(new Location(this.world, joueur.getX(), joueur.getY(), joueur.getZ()-1));
+		barriere.add(new Location(this.world, joueur.getX()-1, joueur.getY(), joueur.getZ()-1));
+		barriere.add(new Location(this.world, joueur.getX()-1, joueur.getY(), joueur.getZ()+1));
+		barriere.add(new Location(this.world, joueur.getX()+1, joueur.getY(), joueur.getZ()-1));
+		barriere.add(new Location(this.world, joueur.getX()+1, joueur.getY(), joueur.getZ()+1));
+		
+		barriere.add(new Location(this.world, joueur.getX()+1, joueur.getY()+1, joueur.getZ()));
+		barriere.add(new Location(this.world, joueur.getX()-1, joueur.getY()+1, joueur.getZ()));
+		barriere.add(new Location(this.world, joueur.getX(), joueur.getY()+1, joueur.getZ()+1));
+		barriere.add(new Location(this.world, joueur.getX(), joueur.getY()+1, joueur.getZ()-1));
+		barriere.add(new Location(this.world, joueur.getX()-1, joueur.getY()+1, joueur.getZ()-1));
+		barriere.add(new Location(this.world, joueur.getX()-1, joueur.getY()+1, joueur.getZ()+1));
+		barriere.add(new Location(this.world, joueur.getX()+1, joueur.getY()+1, joueur.getZ()-1));
+		barriere.add(new Location(this.world, joueur.getX()+1, joueur.getY()+1, joueur.getZ()+1));
+		
+		return barriere;
+	}
+	
 	public boolean doitMelanger() {
 		return this.pioche.size() < 15;
 	}
@@ -705,7 +746,23 @@ public class BangController implements CommandExecutor {
 		return action;
 	}
 
-
+	public void setPrison(Joueur j) {
+		ArrayList<Location> loc = (ArrayList<Location>) getBarriere(j.getLocation()).clone();
+		for (Location l : loc) {
+			Block b = l.getBlock();
+			b.setType(Material.IRON_FENCE);
+		}
+	}
+	
+	public void resetPrison(Location l) {
+		ArrayList<Location> loc = (ArrayList<Location>) getBarriere(l).clone();
+		for (Location ll : loc) {
+			Block b = ll.getBlock();
+			b.setType(Material.BARRIER);
+		}
+	}
+	
+	
 	public void resetPartialPlateforme(Location l) {
 		Location loc = l.clone();
 		loc.setY(loc.getY()+2);
@@ -829,7 +886,7 @@ public class BangController implements CommandExecutor {
 		Inventory vision = Bukkit.createInventory(null, 36,"§8"+nom);
 		ItemStack cache = new ItemStack(Material.ENDER_PEARL);
 		ItemMeta cacheD = cache.getItemMeta();
-		cacheD.setDisplayName("§bCarte caché");
+		cacheD.setDisplayName("§bCarte cachée");
 		cacheD.addEnchant(Enchantment.DAMAGE_ALL, 200, true);
 		cacheD.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 		cache.setItemMeta(cacheD);
@@ -852,7 +909,7 @@ public class BangController implements CommandExecutor {
 		System.out.println(vision);
 		ItemStack cache = new ItemStack(Material.ENDER_PEARL);
 		ItemMeta cacheD = cache.getItemMeta();
-		cacheD.setDisplayName("§eCarte caché");
+		cacheD.setDisplayName("§eCarte cachée");
 		cacheD.addEnchant(Enchantment.DAMAGE_ALL, 200, true);
 		cacheD.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 		cache.setItemMeta(cacheD);

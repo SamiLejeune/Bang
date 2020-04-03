@@ -3,6 +3,7 @@ package fr.azgardien.cartes;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -27,11 +28,22 @@ public class Biere extends Carte
 	@Override
 	public void appliquerEffet(Joueur source, Joueur target) {
 		if (source.biere(this)) {
-			BangController.getInstance().getPlayerServer(source).closeInventory();	
-			Bukkit.broadcastMessage("§a"+source.getPseudo() + " boit une bière pour regagner une vie");
-			BangController.getInstance().getPlayerServer(source).openInventory(BangController.getInstance().playerInventory(source));
+			if (BangController.getInstance().getPlayers().size() ==2) {
+				Player p = BangController.getInstance().getPlayerServer(source);
+				p.sendMessage("§c Bière et saloon interdit en 1v1");
+				source.pioche(this);
+			} else {
+				BangController.getInstance().getPlayerServer(source).closeInventory();	
+				Bukkit.broadcastMessage("§a"+source.getPseudo() + " boit une bière pour regagner une vie");
+				BangController.getInstance().getPlayerServer(source).openInventory(BangController.getInstance().playerInventory(source));
+			}	
 		} else {
-			BangController.getInstance().getPlayerServer(source).sendMessage("§cVous êtes au max de votre vie");
+			if (BangController.getInstance().getPlayers().size() ==2) {
+				Player p = BangController.getInstance().getPlayerServer(source);
+				p.sendMessage("§c Bière et saloon interdit en 1v1");
+			} else {
+				BangController.getInstance().getPlayerServer(source).sendMessage("§cVous êtes au max de votre vie");
+			}			
 		}
 	
 	}

@@ -3,6 +3,7 @@ package fr.azgardien.cartes;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -25,14 +26,20 @@ public class Saloon extends Carte
     @Override
     public void appliquerEffet(Joueur source,Joueur target)
     {
-    	Bukkit.broadcastMessage("§a"+source.getPseudo()+" pose un saloon");
-        for (Joueur j : BangController.getInstance().getPlayers()) {
-        	if (j.biereSaloon()) {
-        		Bukkit.broadcastMessage("§a"+j.getPseudo() + " boit une bière pour regagner une vie");
-        	} else {
-        		BangController.getInstance().getPlayerServer(j).sendMessage("§cVous êtes au max de votre vie");
-        	}
-        }
+    	if (BangController.getInstance().getPlayers().size() ==2) {
+    		Player p = BangController.getInstance().getPlayerServer(source);
+			p.sendMessage("§c Bière et saloon interdit en 1v1");
+			source.pioche(this);
+		} else {
+			Bukkit.broadcastMessage("§a"+source.getPseudo()+" pose un saloon");
+	        for (Joueur j : BangController.getInstance().getPlayers()) {
+	        	if (j.biereSaloon()) {
+	        		Bukkit.broadcastMessage("§a"+j.getPseudo() + " boit une bière pour regagner une vie");
+	        	} else {
+	        		BangController.getInstance().getPlayerServer(j).sendMessage("§cVous êtes au max de votre vie");
+	        	}
+	        }
+		}	
     }
 
 	@Override
