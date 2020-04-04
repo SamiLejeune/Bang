@@ -11,6 +11,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import fr.azgardien.bang.BangController;
 import fr.azgardien.bang.Joueur;
+import fr.azgardien.roles.Jourdonnais;
 
 public class Gatling extends Carte
 {
@@ -41,13 +42,52 @@ public class Gatling extends Carte
     		Bukkit.broadcastMessage("§a"+source.getPseudo() + " pose une gatling");
     		for (Joueur j : BangController.getInstance().players) {
 				if (source != j) {
-					BangController controller = BangController.getInstance();
-					j.actionRecu = this;
-					source.joueurAttaque = j;
-					j.sourceAction = source;
-					Player cible = controller.getPlayerServer(j);
-					Inventory action = controller.actionInventory(source, j, getNom());
-					cible.openInventory(action);
+					if (j.getPerso().getClass() == Jourdonnais.class) {
+						BangController instance = BangController.getInstance();
+						Carte cartePlanque = instance .getCarte();
+						Bukkit.broadcastMessage("§b" + j.getPseudo() + " tire : " + cartePlanque.getNom() + " ["+cartePlanque.getVal() + " de " + cartePlanque.getCouleur() + "]");
+						instance.defausse(cartePlanque);
+						System.out.println("Apres action " + BangController.getInstance().allCarteSize());
+						System.out.println(instance.defausses);
+						if (cartePlanque.getCouleur() == Couleur.Coeur) {											
+							Bukkit.broadcastMessage("§a"+j.getPseudo() + " évite la gatling");	
+						} else {
+							BangController controller = BangController.getInstance();
+							j.actionRecu = this;
+							source.joueurAttaque = j;
+							j.sourceAction = source;
+							Player cible = controller.getPlayerServer(j);
+							Inventory action = controller.actionInventory(source, j, getNom());
+							cible.openInventory(action);
+						}
+					} else if (j.aPlanque) {
+						BangController instance = BangController.getInstance();
+						Carte cartePlanque = instance .getCarte();
+						Bukkit.broadcastMessage("§b" + j.getPseudo() + " tire : " + cartePlanque.getNom() + " ["+cartePlanque.getVal() + " de " + cartePlanque.getCouleur() + "]");
+						instance.defausse(cartePlanque);
+						System.out.println("Apres action " + BangController.getInstance().allCarteSize());
+						System.out.println(instance.defausses);
+						if (cartePlanque.getCouleur() == Couleur.Coeur) {											
+							Bukkit.broadcastMessage("§a"+j.getPseudo() + " évite la gatling");	
+						} else {
+							BangController controller = BangController.getInstance();
+							j.actionRecu = this;
+							source.joueurAttaque = j;
+							j.sourceAction = source;
+							Player cible = controller.getPlayerServer(j);
+							Inventory action = controller.actionInventory(source, j, getNom());
+							cible.openInventory(action);
+						}
+					}	else {
+						BangController controller = BangController.getInstance();
+						j.actionRecu = this;
+						source.joueurAttaque = j;
+						j.sourceAction = source;
+						Player cible = controller.getPlayerServer(j);
+						Inventory action = controller.actionInventory(source, j, getNom());
+						cible.openInventory(action);
+					}
+					
 				}
 			}
 		} else if (target.finAction == true && target.contreAction == false) {

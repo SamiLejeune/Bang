@@ -186,7 +186,28 @@ public class BangListeners implements Listener {
 				String actionCarte = item.getItemMeta().getDisplayName().substring(2);
 				Carte sourceAction = instance.getType(actionCarte);
 				Carte c = instance.isGameMaterial(type);
-				if (sourceAction.carteQuiContre().getNom().equals(c.getNom())) {
+				
+				boolean correct = false;		
+				if (joueur.getPerso().getClass() == CalamityJanet.class) {
+					if (sourceAction.getClass() == Bang.class ) {
+						if (c.getNom().equals("Bang")) {
+							correct = true;
+						} else {
+							correct = sourceAction.carteQuiContre().getNom().equals(c.getNom());
+						}
+					} else if (sourceAction.getClass() == Duel.class) {
+						if (c.getNom().equals("Rate")) {
+							correct = true;
+						} else {
+							correct = sourceAction.carteQuiContre().getNom().equals(c.getNom());
+						}
+					} else {
+						correct = sourceAction.carteQuiContre().getNom().equals(c.getNom());
+					}
+				} else {
+					correct = sourceAction.carteQuiContre().getNom().equals(c.getNom());
+				}
+				if (correct) {
 					if (sourceAction.getClass() == Duel.class) {
 						Player joueurFace = BangController.getInstance().getPlayerServer(j);
 						Bukkit.broadcastMessage("§b"+joueur.getPseudo() + " pose un bang");
@@ -196,10 +217,11 @@ public class BangListeners implements Listener {
 						player.closeInventory();
 					} else {
 						// on utilise la carte
+						System.out.println("ici enft");
 						joueur.contreAction = true;
 						joueur.finAction = true;
 						c.appliquerEffet(null, joueur);	
-						if (sourceAction.getClass() == Bang.class) {
+						if (sourceAction.getClass() == Bang.class) {						
 							instance.currentNbBang++;
 						}	
 						joueur.defausse(c);			
@@ -360,6 +382,7 @@ public class BangListeners implements Listener {
 									return;
 								}
 							}
+							BangController.getInstance().currentNbBang++;
 							ItemStack item = new ItemStack(Material.ARROW);
 							ItemMeta itemD = item.getItemMeta();
 							itemD.setDisplayName("§6Choix victime");

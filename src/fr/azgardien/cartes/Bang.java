@@ -11,6 +11,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import fr.azgardien.bang.BangController;
 import fr.azgardien.bang.Joueur;
+import fr.azgardien.roles.Jourdonnais;
 
 public class Bang extends Carte 
 {
@@ -27,9 +28,7 @@ public class Bang extends Carte
 	@Override
 	public void appliquerEffet(Joueur source, Joueur target) {
 		if (target.finAction == false && target.contreAction == false) {
-			if (target.aPlanque == true) {
-				System.out.println("Il a une planque");
-				Bukkit.broadcastMessage("§b" + target.getPseudo() + " a une planque !");
+			if (target.getPerso().getClass() == Jourdonnais.class && target.aPlanque == false) {
 				BangController instance = BangController.getInstance();
 				Carte cartePlanque = instance .getCarte();
 				Bukkit.broadcastMessage("§b" + target.getPseudo() + " tire : " + cartePlanque.getNom() + " ["+cartePlanque.getVal() + " de " + cartePlanque.getCouleur() + "]");
@@ -48,6 +47,41 @@ public class Bang extends Carte
 					Inventory action = controller.actionInventory(source, target, getNom());
 					cible.openInventory(action);
 				}
+			}else if (target.aPlanque == true) {
+				int k = 1;
+				
+				//si jourdonnais k = 2
+				if (target.getPerso().getClass() == Jourdonnais.class) {
+					k = 2;
+				}
+				
+				boolean evite = false;
+				for (int i = 1 ; i < k+1 && evite == false ; i++) {
+					System.out.println("Il a une planque");
+					Bukkit.broadcastMessage("§b" + target.getPseudo() + " a une planque !");
+					BangController instance = BangController.getInstance();
+					Carte cartePlanque = instance .getCarte();
+					Bukkit.broadcastMessage("§b" + target.getPseudo() + " tire : " + cartePlanque.getNom() + " ["+cartePlanque.getVal() + " de " + cartePlanque.getCouleur() + "]");
+					instance.defausse(cartePlanque);
+					System.out.println("Apres action " + BangController.getInstance().allCarteSize());
+					System.out.println(instance.defausses);
+					if (cartePlanque.getCouleur() == Couleur.Coeur) {											
+						Bukkit.broadcastMessage("§a"+target.getPseudo() + " évite le bang");	
+						evite = true;
+					} 
+				}
+				
+				if (!evite) {
+					Bukkit.broadcastMessage("§a"+source.getPseudo() + " a BANG " + target.getPseudo());	
+					BangController controller = BangController.getInstance();
+					target.actionRecu = this;
+					source.joueurAttaque = target;
+					target.sourceAction = source;
+					Player cible = controller.getPlayerServer(target);
+					Inventory action = controller.actionInventory(source, target, getNom());
+					cible.openInventory(action);
+				}
+							
 			} else {
 				Bukkit.broadcastMessage("§a"+source.getPseudo() + " a BANG " + target.getPseudo());	
 				BangController controller = BangController.getInstance();
