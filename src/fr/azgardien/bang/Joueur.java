@@ -2,6 +2,7 @@ package fr.azgardien.bang;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
@@ -315,6 +316,16 @@ public class Joueur {
 		Carte c =  this.mains.get(alea);
 		mains.remove(alea);
 		return c;
+	}
+	
+	public Carte getRandomFromMainEtPose() {
+		Random random = new Random();
+		ArrayList<Carte> list = (ArrayList<Carte>) this.mains.clone();
+		list.addAll((ArrayList<Carte>) this.poses.clone());
+		int max = list.size()-1;
+		int alea = random.nextInt(max + 1);
+		return list.get(alea);
+		
 	}
 	
 	public Carte getFromMain(Material type) {

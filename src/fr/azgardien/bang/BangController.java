@@ -90,6 +90,11 @@ public class BangController implements CommandExecutor {
 		return this.magasins.get(alea);
 	}
 
+	public void supprimeDernierCarteDefausse() {
+		if (this.defausses.size()-1 >=0) this.defausses.remove(this.defausses.size()-1);
+		
+	}
+	
 	private boolean start;
 	public boolean startTask;
 	private Location[] spots;
@@ -109,7 +114,8 @@ public class BangController implements CommandExecutor {
 	public boolean duelFin;
 	public boolean duelPremature;
 	public Joueur duelCurrentJoueur;
-
+	public Joueur coupDeFoudreJoueur;
+	public boolean quitVisionVolontaire;
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String arg2, String[] args) {
 		if (sender.getServer().getWorld("world").getPlayers().size() > 7) {
@@ -602,7 +608,7 @@ public class BangController implements CommandExecutor {
 		duelPremature = false;
 		currentNbBang = 0;
 		duelCurrentJoueur = null;
-
+		quitVisionVolontaire = false;
 		for(Player p : this.world.getPlayers()) {
 			p.setGameMode(GameMode.ADVENTURE);
 		}
@@ -1024,9 +1030,10 @@ public class BangController implements CommandExecutor {
 
 	public boolean peutBraquage(Joueur source , Joueur cible) {
 		if (source.estPose(new Lunette("", Couleur.Carreau))) {
-			return (getMinimumDistance(players, source, cible)+1) <= 2 ;
+			System.out.println("Mazette " + ((getMinimumDistance(players, source, cible)+1) + cible.getPerso().getDistance()));
+			return ((getMinimumDistance(players, source, cible)+1) + cible.getPerso().getDistance()) <= 2 ;
 		} else {
-			return getMinimumDistance(players, source, cible) == 1;
+			return getMinimumDistance(players, source, cible) + cible.getPerso().getDistance() == 1;
 		}
 	}
 
