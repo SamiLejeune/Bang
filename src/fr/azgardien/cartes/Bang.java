@@ -34,12 +34,9 @@ public class Bang extends Carte
 			Bukkit.broadcastMessage("§b" + target.getPseudo() + " utilise la capacité de Jourdonnais !");
 			Bukkit.broadcastMessage("§b" + target.getPseudo() + " tire : " + cartePlanque.getNom() + " ["+cartePlanque.getVal() + " de " + cartePlanque.getCouleur() + "]");
 			instance.defausse(cartePlanque);
-			System.out.println("Apres action " + BangController.getInstance().allCarteSize());
-			System.out.println(instance.defausses);
 			if (cartePlanque.getCouleur() == Couleur.Coeur) {											
 				Bukkit.broadcastMessage("§a"+target.getPseudo() + " évite le bang");	
 			} else {
-				System.out.println("Alors icii??");
 				Bukkit.broadcastMessage("§a"+target.getPseudo() + " n'évite pas le bang ");	
 				BangController controller = BangController.getInstance();
 				target.actionRecu = this;
@@ -54,16 +51,14 @@ public class Bang extends Carte
 			boolean evite = false;
 			
 			if (target.getPerso().getClass() == Jourdonnais.class) {
-				System.out.println("Il a jourdonnais");
 				Bukkit.broadcastMessage("§a"+target.getPseudo() + " reçoit un bang de " + source.getPseudo());
 				Bukkit.broadcastMessage("§b" + target.getPseudo() + " utilise la capacité de Jourdonnais !");
 				BangController instance = BangController.getInstance();
 				Carte cartePlanque = instance .getCarte();
 				Bukkit.broadcastMessage("§b" + target.getPseudo() + " tire : " + cartePlanque.getNom() + " ["+cartePlanque.getVal() + " de " + cartePlanque.getCouleur() + "]");
 				instance.defausse(cartePlanque);
-				System.out.println("Apres action " + BangController.getInstance().allCarteSize());
-				System.out.println(instance.defausses);
-				if (cartePlanque.getCouleur() == Couleur.Coeur) {											
+				if (cartePlanque.getCouleur() == Couleur.Coeur) {
+					instance.currentNbBang++;
 					Bukkit.broadcastMessage("§a"+target.getPseudo() + " évite le bang");
 					evite = true;
 				}
@@ -71,17 +66,15 @@ public class Bang extends Carte
 				Bukkit.broadcastMessage("§a"+target.getPseudo() + " reçoit un bang de " + source.getPseudo());
 			}
 			if (!evite) {
-				System.out.println("Il a une planque");
 				Bukkit.broadcastMessage("§b" + target.getPseudo() + " a une planque !");
 				BangController instance = BangController.getInstance();
 				Carte cartePlanque = instance .getCarte();
 				Bukkit.broadcastMessage("§b" + target.getPseudo() + " tire : " + cartePlanque.getNom() + " ["+cartePlanque.getVal() + " de " + cartePlanque.getCouleur() + "]");
 				instance.defausse(cartePlanque);
-				System.out.println("Apres action " + BangController.getInstance().allCarteSize());
-				System.out.println(instance.defausses);
 				if (cartePlanque.getCouleur() == Couleur.Coeur) {											
 					Bukkit.broadcastMessage("§a"+target.getPseudo() + " évite le bang");	
 					evite = true;
+					instance.currentNbBang++;
 				} 
 			}
 			
@@ -98,7 +91,6 @@ public class Bang extends Carte
 			}
 						
 		} else {
-			System.out.println("Bah en tout cas je pense que je suis ici");
 			Bukkit.broadcastMessage("§a"+source.getPseudo() + " a BANG " + target.getPseudo());	
 			BangController controller = BangController.getInstance();
 			target.actionRecu = this;
@@ -112,9 +104,35 @@ public class Bang extends Carte
     
     public void slab(Joueur source, Joueur target) {
     	if (target.aPlanque) {
-    		System.out.println("Planque");
+    		Bukkit.broadcastMessage("§a"+target.getPseudo() + " reçoit un bang de " + source.getPseudo() + " et il lui faut 2 Raté");
+    		Bukkit.broadcastMessage("§b" + target.getPseudo() + " a une planque !");
+			BangController instance = BangController.getInstance();
+			Carte cartePlanque = instance .getCarte();
+			Bukkit.broadcastMessage("§b" + target.getPseudo() + " tire : " + cartePlanque.getNom() + " ["+cartePlanque.getVal() + " de " + cartePlanque.getCouleur() + "]");
+			instance.defausse(cartePlanque);
+			if (cartePlanque.getCouleur() == Couleur.Coeur) {		
+				instance.currentNbBang++;
+				Bukkit.broadcastMessage("§a"+target.getPseudo() + " a besoin que d'un seul Raté..");
+				BangController controller = BangController.getInstance();
+				target.actionRecu = this;
+				source.joueurAttaque = target;
+				target.sourceAction = source;
+				Player cible = controller.getPlayerServer(target);
+				Inventory action = controller.actionInventory(source, target, getNom());
+				cible.openInventory(action);
+			} else {
+				Bukkit.broadcastMessage("§a"+target.getPseudo() + " n'a pas contré slab avec une planque, il lui faut 2 Raté");
+				BangController controller = BangController.getInstance();
+				target.actionRecu = this;
+				source.joueurAttaque = target;
+				target.sourceAction = source;
+				Player cible = controller.getPlayerServer(target);
+				Inventory action = controller.actionInventory(source, target, getNom());
+				cible.openInventory(action);
+				BangController.getInstance().slabBang = true;
+				BangController.getInstance().consommeRate = false;
+			}
     	} else {
-    		System.out.println("Pas Planque");
     		Bukkit.broadcastMessage("§a"+target.getPseudo() + " reçoit un bang de " + source.getPseudo() + " et il lui faut 2 Raté");
 			BangController controller = BangController.getInstance();
 			target.actionRecu = this;
@@ -130,22 +148,56 @@ public class Bang extends Carte
     
 	@Override
 	public void appliquerEffet(Joueur source, Joueur target) {
-		System.out.println("Target fin action : " + target.finAction );
-		System.out.println("Target contre action : " + target.contreAction );
 		BangController instance = BangController.getInstance();
-		System.out.println("Slab bang : " +instance.slabBang);
 		if (target.finAction == false && target.contreAction == false && !instance.slabBang) {
-			System.out.println("Bah ici je pense sinon Colin salope bis");
 			if (source.getPerso().getClass() == SlabLeFlingueur.class) {
 				System.out.println("Bang d'un slab");
 				if (target.getPerso().getClass() == Jourdonnais.class) {
-					System.out.println("c'est un jourdonnais");
+					Bukkit.broadcastMessage("§a"+target.getPseudo() + " reçoit un bang de " + source.getPseudo());
+					Bukkit.broadcastMessage("§b" + target.getPseudo() + " utilise la capacité de Jourdonnais !");
+					Carte cartePlanque = instance .getCarte();
+					Bukkit.broadcastMessage("§b" + target.getPseudo() + " tire : " + cartePlanque.getNom() + " ["+cartePlanque.getVal() + " de " + cartePlanque.getCouleur() + "]");
+					instance.defausse(cartePlanque);
+					if (cartePlanque.getCouleur() == Couleur.Coeur) {											
+						Bukkit.broadcastMessage("§a"+target.getPseudo() + " a besoin que d'un seul Raté..");
+						instance.currentNbBang++;
+						if (target.aPlanque) {
+				    		Bukkit.broadcastMessage("§b" + target.getPseudo() + " a une planque !");
+							Carte cartePlanque1 = instance .getCarte();
+							Bukkit.broadcastMessage("§b" + target.getPseudo() + " tire : " + cartePlanque1.getNom() + " ["+cartePlanque1.getVal() + " de " + cartePlanque1.getCouleur() + "]");
+							instance.defausse(cartePlanque1);
+							if (cartePlanque1.getCouleur() == Couleur.Coeur) {
+								instance.currentNbBang++;
+								Bukkit.broadcastMessage("§a"+target.getPseudo() + " a contré slab avec sa capacité de jourdonnais et sa planque");
+							} else {
+								Bukkit.broadcastMessage("§a"+target.getPseudo() + " n'a pas contré slab avec une planque");
+								BangController controller = BangController.getInstance();
+								target.actionRecu = this;
+								source.joueurAttaque = target;
+								target.sourceAction = source;
+								Player cible = controller.getPlayerServer(target);
+								Inventory action = controller.actionInventory(source, target, getNom());
+								cible.openInventory(action);
+							}
+				    	} else {
+				    		System.out.println("Pas Planque");
+							BangController controller = BangController.getInstance();
+							target.actionRecu = this;
+							source.joueurAttaque = target;
+							target.sourceAction = source;
+							Player cible = controller.getPlayerServer(target);
+							Inventory action = controller.actionInventory(source, target, getNom());
+							cible.openInventory(action);
+				    	}
+					} else {
+						Bukkit.broadcastMessage("§a"+target.getPseudo() + " n'a pas contré slab avec sa capacité de jourdonnais");
+						slab(source, target);
+					}
 				} else {
 					slab(source,target);
 				}
 				
 			} else {
-				System.out.println("Pas slab");
 				horsSlabEffet(source, target);
 			}
 						

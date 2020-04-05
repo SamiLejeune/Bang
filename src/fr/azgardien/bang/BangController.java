@@ -1053,7 +1053,6 @@ public class BangController implements CommandExecutor {
 
 	public boolean peutBraquage(Joueur source , Joueur cible) {
 		if (source.estPose(new Lunette("", Couleur.Carreau))) {
-			System.out.println("Mazette " + ((getMinimumDistance(players, source, cible)+1) + cible.getPerso().getDistance()));
 			return ((getMinimumDistance(players, source, cible)+1) + cible.getPerso().getDistance()) <= 2 ;
 		} else {
 			return getMinimumDistance(players, source, cible) + cible.getPerso().getDistance() == 1;

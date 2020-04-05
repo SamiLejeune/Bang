@@ -226,10 +226,8 @@ public class BangListeners implements Listener {
 						player.closeInventory();
 					} else {
 						// on utilise la carte
-						System.out.println("ici enft");
 						joueur.contreAction = true;
 						joueur.finAction = true;
-						System.out.println("Consomme raté : " + instance.consommeRate);
 						if (instance.consommeRate == true) {
 							c.appliquerEffet(null, joueur);
 							if (sourceAction.getClass() == Bang.class) {
@@ -244,7 +242,6 @@ public class BangListeners implements Listener {
 							joueur.joueurAttaque = null;
 						} else {
 							if (sourceAction.getClass() == Bang.class) {
-								System.out.println("Aqui ahora");
 								instance.currentNbBang++;
 							}
 							Bukkit.broadcastMessage("§b" + j.getPseudo() + " défausse un Raté..");
@@ -414,7 +411,6 @@ public class BangListeners implements Listener {
 						player.closeInventory();
 						instance.getJoueur(player).currentAction = c;
 					} else if (c.getClass() == Rate.class) {
-						System.out.println("use un rate");
 						if (instance.getJoueur(player).getPerso().getClass()== (CalamityJanet.class)) {
 							if (c.getClass() == Bang.class || c.getClass() == Rate.class) {
 								if (!joueur.peutTirer()) {
@@ -604,8 +600,6 @@ public class BangListeners implements Listener {
 					instance.supprimeDernierCarteDefausse();
 				} 		
 			} else if (inv.getName().equals("§8Coup de foudre")) {
-
-				System.out.println(instance.coupDeFoudreJoueur);
 				if (instance.coupDeFoudreJoueur != null) {
 					Carte random = instance.coupDeFoudreJoueur.getRandomFromMainEtPose();
 					instance.currentJoueur.joueurBraque.updateRemoveTargettable(random);
@@ -622,7 +616,6 @@ public class BangListeners implements Listener {
 				instance.coupDeFoudreJoueur = null;
 				instance.quitVisionVolontaire = false;
 			} else if (inv.getName().equals("§8Braquage")) {
-				System.out.println(instance.coupDeFoudreJoueur);
 				if (instance.coupDeFoudreJoueur != null) {
 					Carte random = instance.coupDeFoudreJoueur.getRandomFromMainEtPose();
 					instance.currentJoueur.pioche(random);
@@ -638,12 +631,8 @@ public class BangListeners implements Listener {
 				instance.coupDeFoudreJoueur = null;
 				instance.quitVisionVolontaire = false;
 			}
-			System.out.println("Duel fin : " + instance.duelFin);
 			if (instance.duelFin == true) {	
-				System.out.println("Joueur fin action : " + j.finAction + " instance slab bang " + instance.slabBang + " dernier slab " + instance.dernierSlabRate + " quit volontaire " + instance.quitVolontaire);
 				if (inv.getName().equalsIgnoreCase("§8Action") && (instance.slabBang == true || instance.dernierSlabRate == true)) {
-					System.out.println("Clara la best");
-					System.out.println("Bah ici je pense sinon Colin la plus grosse salope du monde entier sa mere");
 					if (instance.quitVolontaire == false) {
 					//	Bukkit.broadcastMessage("§b" + j.getPseudo() + " a quitté et se prend le bang!");
 						j.finAction = true;
@@ -658,15 +647,12 @@ public class BangListeners implements Listener {
 						instance.resetSlabAttribute();
 					} else if (j.finAction) {
 						if (instance.slabBang == false) {
-							System.out.println("Ici c'est fini on compare");
-							System.out.println("il prend pas tarif");
 							Bukkit.broadcastMessage("§a"+ j.getPseudo() + " a réussi à contrer slab le flingueur");
 							instance.resetSlabAttribute();
 						} 
 					}				
 					instance.quitVolontaire = false;
 				} else if (inv.getName().equalsIgnoreCase("§8Action") && !j.finAction) {
-					System.out.println("Bah ici je pense sinon Colin la plus grosse salope");
 					j.finAction = true;
 					j.contreAction = false;
 					j.actionRecu.appliquerEffet(j.sourceAction, j);
@@ -704,7 +690,6 @@ public class BangListeners implements Listener {
 			} else {
 				if (inv.getName().equals("§8Action")) {
 					if (instance.duelCurrentJoueur == j) {
-						System.out.println("ici duel premature qui fait --");
 						ItemStack actionSource = inv.getItem(16);
 						String nomSource = actionSource.getItemMeta().getDisplayName().substring(2);
 						Joueur jAction = BangController.getInstance().getJoueur(nomSource);
