@@ -11,6 +11,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import fr.azgardien.bang.BangController;
 import fr.azgardien.bang.Joueur;
+import fr.azgardien.roles.ElGringo;
 import fr.azgardien.roles.Jourdonnais;
 import fr.azgardien.roles.SlabLeFlingueur;
 
@@ -202,8 +203,17 @@ public class Bang extends Carte
 			}
 						
 		} else if (target.finAction == true && target.contreAction == false) {
+			
 			target.bang(source);
 			target.tueur = source;
+			if (target.getPerso().getClass() == ElGringo.class) {
+				Player player = instance.getPlayerServer(target);
+				player.closeInventory();
+				Bukkit.broadcastMessage("§6El Gringo active sa capacité et pioche dans la main du joueur");		
+				Carte carte = source.getRandomFromMain();
+				target.pioche(carte);
+				player.sendMessage("§dVous récupérez : " + carte.getNom() + " ["+carte.getVal() + " de " + carte.getCouleur() + "]" );
+			}
 		} else {
 			Bukkit.broadcastMessage("§a"+ target.getPseudo() + " défausse un BANG et ne perd pas de point de vie");
 		}

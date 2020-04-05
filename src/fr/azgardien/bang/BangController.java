@@ -38,6 +38,7 @@ import fr.azgardien.cartes.Volcanic;
 import fr.azgardien.cartes.Winchester;
 import fr.azgardien.roles.Personnage;
 import fr.azgardien.roles.PersonnageFactory;
+import fr.azgardien.roles.SamLeVautour;
 
 public class BangController implements CommandExecutor {
 
@@ -337,14 +338,34 @@ public class BangController implements CommandExecutor {
 		}
 		Bukkit.broadcastMessage("§aLe joueur " + j.getPseudo() + " est éliminé ! Il était " + j.getRole());
 		this.players.remove(idx);
+		
+		boolean samRecup = false;
+		for (Joueur joueur : this.players) {
+			if (joueur != j) {
+				if (joueur.getPerso().getClass() == SamLeVautour.class) {
+					Bukkit.broadcastMessage("§b"+joueur.getPseudo() + " qui est Sam le vautour récupère les cartes de " + j.getPseudo());
+					for(Carte c : j.getPoses()) {
+						joueur.pioche(c);
+					}
 
-		for(Carte c : j.getPoses()) {
-			defausse(c);
+					for(Carte c : j.getMains()) {
+						joueur.pioche(c);
+					}
+					samRecup = true;
+				}
+			}
 		}
+		
+		if(!samRecup) {
+			for(Carte c : j.getPoses()) {
+				defausse(c);
+			}
 
-		for(Carte c : j.getMains()) {
-			defausse(c);
+			for(Carte c : j.getMains()) {
+				defausse(c);
+			}
 		}
+		
 		this.getPlayerServer(j).getInventory().clear();
 		this.getPlayerServer(j).teleport(new Location(world, 183.5, 131, 229.5 ,88,0));
 

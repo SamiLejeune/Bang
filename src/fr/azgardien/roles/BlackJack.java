@@ -1,6 +1,13 @@
 package fr.azgardien.roles;
 
+import java.util.ArrayList;
+
+import org.bukkit.Bukkit;
+
+import fr.azgardien.bang.BangController;
 import fr.azgardien.bang.Joueur;
+import fr.azgardien.cartes.Carte;
+import fr.azgardien.cartes.Couleur;
 
 public class BlackJack extends Personnage {
 
@@ -41,6 +48,22 @@ public class BlackJack extends Personnage {
 	public String joueurMort(Joueur recup, Joueur mort) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public ArrayList<Carte> piocheTour() {
+		Bukkit.broadcastMessage("§6 Black Jack pioche comme c'est son tour");
+		ArrayList<Carte> pioche = new ArrayList<Carte>();
+		Carte c1 = BangController.getInstance().getCarte();
+		pioche.add(c1);
+		Carte c2  = BangController.getInstance().getCarte();
+		pioche.add(c2);
+		Bukkit.broadcastMessage("§6 Il tire : " + c2.getNom() + " ["+c2.getVal() + " de " + c2.getCouleur() + "]");
+		if(c2.getCouleur() == Couleur.Coeur || c2.getCouleur() == Couleur.Carreau) {
+			Bukkit.broadcastMessage("§6 Il pioche une carte supplémentaire");
+			Carte c3  = BangController.getInstance().getCarte();
+			pioche.add(c3);
+		}
+		return pioche;
 	}
 	
 

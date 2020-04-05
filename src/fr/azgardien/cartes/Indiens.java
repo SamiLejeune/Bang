@@ -11,6 +11,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import fr.azgardien.bang.BangController;
 import fr.azgardien.bang.Joueur;
+import fr.azgardien.roles.ElGringo;
 
 public class Indiens extends Carte
 {
@@ -44,6 +45,14 @@ public class Indiens extends Carte
 			target.bang(source);
 			if (BangController.getInstance().currentNbBang > 0) BangController.getInstance().currentNbBang--;
 			target.tueur = source;
+			if (target.getPerso().getClass() == ElGringo.class) {
+				Player player = BangController.getInstance().getPlayerServer(target);
+				player.closeInventory();
+				Bukkit.broadcastMessage("§6El Gringo active sa capacité et pioche dans la main du joueur");		
+				Carte carte = source.getRandomFromMain();
+				target.pioche(carte);
+				player.sendMessage("§dVous récupérez : " + carte.getNom() + " ["+carte.getVal() + " de " + carte.getCouleur() + "]" );
+			}
 		} 
     }
 

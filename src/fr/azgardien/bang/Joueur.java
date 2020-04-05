@@ -104,7 +104,6 @@ public class Joueur {
 	}
 
 	public boolean lunette() {
-		System.out.println(carteDejaPose(new Lunette("", Couleur.Carreau)));
 		if (!carteDejaPose(new Lunette("", Couleur.Carreau))) {
 			setLunette();
 			return true;
@@ -312,7 +311,6 @@ public class Joueur {
 		Random random = new Random();
 		int max = this.mains.size()-1;
 		int alea = random.nextInt(max + 1);
-		System.out.println("Alea " + alea);
 		Carte c =  this.mains.get(alea);
 		mains.remove(alea);
 		return c;
@@ -375,7 +373,6 @@ public class Joueur {
 			if (this.perso.getClass() != WillyLeKid.class ) {
 				this.perso.limiteBang = 1;
 			}
-			System.out.println("Limite bang " + this.perso.limiteBang);
 		} else if (carte.getClass() == Lunette.class) {
 			this.removeLunette();
 		} else if (carte.getClass() == Prison.class) {

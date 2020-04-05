@@ -555,14 +555,17 @@ public class BangListeners implements Listener {
 		}
 
 		if (inv.getName().equalsIgnoreCase("§8Braquage") ) {
+			System.out.println("Ici ???");
 			if (type == Material.ENDER_PEARL) {
 				Carte carte = joueur.joueurBraque.getRandomFromMain();
 				joueur.pioche(carte);
+				player.sendMessage("§dVous récupérez : " + carte.getNom() + " ["+carte.getVal() + " de " + carte.getCouleur() + "]" );
 				instance.coupDeFoudreJoueur = null;
 			} else {
 				Carte carte = joueur.joueurBraque.getFromPose(type);
 				joueur.pioche(carte);
 				joueur.joueurBraque.updateRemoveTargettable(carte);
+				player.sendMessage("§dVous récupérez : " + carte.getNom() + " ["+carte.getVal() + " de " + carte.getCouleur() + "]" );
 				instance.coupDeFoudreJoueur = null;
 
 			}
@@ -616,6 +619,9 @@ public class BangListeners implements Listener {
 			} else if (inv.getName().equals("§8Coup de foudre")) {
 				if (instance.coupDeFoudreJoueur != null) {
 					Carte random = instance.coupDeFoudreJoueur.getRandomFromMainEtPose();
+					if (instance.coupDeFoudreJoueur.getFromMain(random.representation().getType()) == null) {
+						instance.coupDeFoudreJoueur.getFromPose(random.representation().getType());
+					}
 					instance.currentJoueur.joueurBraque.updateRemoveTargettable(random);
 					Bukkit.broadcastMessage("§b"+instance.currentJoueur.joueurBraque.getPseudo() + " perd " + random.getNom() );
 					instance.defausse(random);
@@ -632,13 +638,16 @@ public class BangListeners implements Listener {
 			} else if (inv.getName().equals("§8Braquage")) {
 				if (instance.coupDeFoudreJoueur != null) {
 					Carte random = instance.coupDeFoudreJoueur.getRandomFromMainEtPose();
+					if (instance.coupDeFoudreJoueur.getFromMain(random.representation().getType()) == null) {
+						instance.coupDeFoudreJoueur.getFromPose(random.representation().getType());
+					}
 					instance.currentJoueur.pioche(random);
 					instance.currentJoueur.joueurBraque.updateRemoveTargettable(random);
 					instance.coupDeFoudreJoueur = null;
 					Braquage braquage = new Braquage("", Couleur.Carreau);
 					instance.currentJoueur.getFromMain(braquage.representation().getType());
 					instance.currentJoueur.joueurBraque = null;
-					player.sendMessage("§bVous récupérez : " + random.getNom());
+					player.sendMessage("§dVous récupérez : " + random.getNom() + " ["+random.getVal() + " de " + random.getCouleur() + "]" );
 					player.closeInventory();
 					player.openInventory(BangController.getInstance().playerInventory(instance.currentJoueur));
 				}
