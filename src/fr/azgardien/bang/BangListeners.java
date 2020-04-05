@@ -40,6 +40,8 @@ import fr.azgardien.cartes.Mustang;
 import fr.azgardien.cartes.Planque;
 import fr.azgardien.cartes.Prison;
 import fr.azgardien.cartes.Rate;
+import fr.azgardien.cartes.Gatling;
+import fr.azgardien.cartes.Indiens;
 import fr.azgardien.roles.CalamityJanet;
 import fr.azgardien.roles.SlabLeFlingueur;
 
@@ -190,9 +192,7 @@ public class BangListeners implements Listener {
 
 			} else {
 
-
 				Joueur j = BangController.getInstance().getJoueur(nomSource);
-
 				Carte sourceAction = instance.getType(actionCarte);
 				Carte c = instance.isGameMaterial(type);
 
@@ -210,7 +210,21 @@ public class BangListeners implements Listener {
 						} else {
 							correct = sourceAction.carteQuiContre().getNom().equals(c.getNom());
 						}
-					} else {
+					} else if (sourceAction.getClass() == Indiens.class) {
+						if (c.getNom().equals("Rate")) {
+							correct = true;
+						} else {
+							correct = sourceAction.carteQuiContre().getNom().equals(c.getNom());
+						}
+					} else if (sourceAction.getClass() == Gatling.class) {
+						if (c.getNom().equals("Bang")) {
+							correct = true;
+						} else {
+							correct = sourceAction.carteQuiContre().getNom().equals(c.getNom());
+						}
+					} 
+					
+					else {
 						correct = sourceAction.carteQuiContre().getNom().equals(c.getNom());
 					}
 				} else {
