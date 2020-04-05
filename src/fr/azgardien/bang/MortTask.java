@@ -10,25 +10,42 @@ public class MortTask extends BukkitRunnable {
 	@Override
 	public void run() {
 		
-		if (BangController.getInstance().startTask) {
-			ArrayList<Joueur> list = BangController.getInstance().getPlayers();
+		BangController instance = BangController.getInstance();
+		if (instance.startTask) {
+			ArrayList<Joueur> list = instance.getPlayers();
 			for (Joueur j : list) {
 				if (j.getVie() <= 0) {
-					BangController.getInstance().resetScoreBoard(BangController.getInstance().getPlayerServer(j));
-					BangController.getInstance().exitPlayer(j);				
-					if (j.getRole() == Role.HorsLaLoi) {
-						Bukkit.broadcastMessage("§b"+j.tueur.getPseudo() + " gagne 3 cartes");
-						j.tueur.pioche(BangController.getInstance().getCarte());
-						j.tueur.pioche(BangController.getInstance().getCarte());
-						j.tueur.pioche(BangController.getInstance().getCarte());
-					} else if (j.getRole() == Role.Adjoint) {
-						if (j.tueur.getRole() == Role.Sherif) {
-							Bukkit.broadcastMessage("§bGrave erreur du shérif, il perd ses cartes");
-							j.tueur.clear();
-						}
+					instance.resetScoreBoard(instance.getPlayerServer(j));
+					instance.resetAllPlateforme(instance.currentJoueur.getLocation());
+					System.out.println("(1)Au tour de : " + instance.currentJoueur);
+					if (instance.currentJoueur == j) {
+						instance.currentJoueur = instance.nextJoueur();
+						System.out.println("Au tour de : " + instance.currentJoueur);
+						instance.currentJoueur.piocheTour();
 					}
-					System.out.println(BangController.getInstance().defausses);
-					System.out.println("Apres mort " + BangController.getInstance().allCarteSize());
+					instance.currentNbBang = 0;
+					
+					instance.affichageCurrent();
+					instance.exitPlayer(j);
+					if (instance.doitMelanger()) {
+						instance.melanger();						
+					}
+					if (!j.aDynamite) {
+						
+						if (j.getRole() == Role.HorsLaLoi) {
+							Bukkit.broadcastMessage("§b"+j.tueur.getPseudo() + " gagne 3 cartes");
+							j.tueur.pioche(instance.getCarte());
+							j.tueur.pioche(instance.getCarte());
+							j.tueur.pioche(instance.getCarte());
+						} else if (j.getRole() == Role.Adjoint) {
+							if (j.tueur.getRole() == Role.Sherif) {
+								Bukkit.broadcastMessage("§bGrave erreur du shérif, il perd ses cartes");
+								j.tueur.clear();
+							}
+						}
+						System.out.println(instance.defausses);
+						System.out.println("Apres mort " + instance.allCarteSize());
+					}
 				}
 			}
 		}

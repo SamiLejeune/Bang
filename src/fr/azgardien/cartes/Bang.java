@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import fr.azgardien.bang.BangController;
 import fr.azgardien.bang.Joueur;
 import fr.azgardien.roles.Jourdonnais;
+import fr.azgardien.roles.SlabLeFlingueur;
 
 public class Bang extends Carte 
 {
@@ -25,10 +26,53 @@ public class Bang extends Carte
         super(val, coul, desc, nom);
     }
 
-	@Override
-	public void appliquerEffet(Joueur source, Joueur target) {
-		if (target.finAction == false && target.contreAction == false) {
-			if (target.getPerso().getClass() == Jourdonnais.class && target.aPlanque == false) {
+    private void horsSlabEffet(Joueur source, Joueur target) {
+    	if (target.getPerso().getClass() == Jourdonnais.class && target.aPlanque == false) {
+			BangController instance = BangController.getInstance();
+			Carte cartePlanque = instance .getCarte();
+			Bukkit.broadcastMessage("§a"+target.getPseudo() + " reçoit un bang de " + source.getPseudo());
+			Bukkit.broadcastMessage("§b" + target.getPseudo() + " utilise la capacité de Jourdonnais !");
+			Bukkit.broadcastMessage("§b" + target.getPseudo() + " tire : " + cartePlanque.getNom() + " ["+cartePlanque.getVal() + " de " + cartePlanque.getCouleur() + "]");
+			instance.defausse(cartePlanque);
+			System.out.println("Apres action " + BangController.getInstance().allCarteSize());
+			System.out.println(instance.defausses);
+			if (cartePlanque.getCouleur() == Couleur.Coeur) {											
+				Bukkit.broadcastMessage("§a"+target.getPseudo() + " évite le bang");	
+			} else {
+				System.out.println("Alors icii??");
+				Bukkit.broadcastMessage("§a"+target.getPseudo() + " n'évite pas le bang ");	
+				BangController controller = BangController.getInstance();
+				target.actionRecu = this;
+				source.joueurAttaque = target;
+				target.sourceAction = source;
+				Player cible = controller.getPlayerServer(target);
+				Inventory action = controller.actionInventory(source, target, getNom());
+				cible.openInventory(action);
+			}
+		}else if (target.aPlanque == true) {
+			
+			boolean evite = false;
+			
+			if (target.getPerso().getClass() == Jourdonnais.class) {
+				System.out.println("Il a jourdonnais");
+				Bukkit.broadcastMessage("§a"+target.getPseudo() + " reçoit un bang de " + source.getPseudo());
+				Bukkit.broadcastMessage("§b" + target.getPseudo() + " utilise la capacité de Jourdonnais !");
+				BangController instance = BangController.getInstance();
+				Carte cartePlanque = instance .getCarte();
+				Bukkit.broadcastMessage("§b" + target.getPseudo() + " tire : " + cartePlanque.getNom() + " ["+cartePlanque.getVal() + " de " + cartePlanque.getCouleur() + "]");
+				instance.defausse(cartePlanque);
+				System.out.println("Apres action " + BangController.getInstance().allCarteSize());
+				System.out.println(instance.defausses);
+				if (cartePlanque.getCouleur() == Couleur.Coeur) {											
+					Bukkit.broadcastMessage("§a"+target.getPseudo() + " évite le bang");
+					evite = true;
+				}
+			} else {
+				Bukkit.broadcastMessage("§a"+target.getPseudo() + " reçoit un bang de " + source.getPseudo());
+			}
+			if (!evite) {
+				System.out.println("Il a une planque");
+				Bukkit.broadcastMessage("§b" + target.getPseudo() + " a une planque !");
 				BangController instance = BangController.getInstance();
 				Carte cartePlanque = instance .getCarte();
 				Bukkit.broadcastMessage("§b" + target.getPseudo() + " tire : " + cartePlanque.getNom() + " ["+cartePlanque.getVal() + " de " + cartePlanque.getCouleur() + "]");
@@ -37,52 +81,12 @@ public class Bang extends Carte
 				System.out.println(instance.defausses);
 				if (cartePlanque.getCouleur() == Couleur.Coeur) {											
 					Bukkit.broadcastMessage("§a"+target.getPseudo() + " évite le bang");	
-				} else {
-					Bukkit.broadcastMessage("§a"+source.getPseudo() + " a BANG " + target.getPseudo());	
-					BangController controller = BangController.getInstance();
-					target.actionRecu = this;
-					source.joueurAttaque = target;
-					target.sourceAction = source;
-					Player cible = controller.getPlayerServer(target);
-					Inventory action = controller.actionInventory(source, target, getNom());
-					cible.openInventory(action);
-				}
-			}else if (target.aPlanque == true) {
-				int k = 1;
-				
-				//si jourdonnais k = 2
-				if (target.getPerso().getClass() == Jourdonnais.class) {
-					k = 2;
-				}
-				
-				boolean evite = false;
-				for (int i = 1 ; i < k+1 && evite == false ; i++) {
-					System.out.println("Il a une planque");
-					Bukkit.broadcastMessage("§b" + target.getPseudo() + " a une planque !");
-					BangController instance = BangController.getInstance();
-					Carte cartePlanque = instance .getCarte();
-					Bukkit.broadcastMessage("§b" + target.getPseudo() + " tire : " + cartePlanque.getNom() + " ["+cartePlanque.getVal() + " de " + cartePlanque.getCouleur() + "]");
-					instance.defausse(cartePlanque);
-					System.out.println("Apres action " + BangController.getInstance().allCarteSize());
-					System.out.println(instance.defausses);
-					if (cartePlanque.getCouleur() == Couleur.Coeur) {											
-						Bukkit.broadcastMessage("§a"+target.getPseudo() + " évite le bang");	
-						evite = true;
-					} 
-				}
-				
-				if (!evite) {
-					Bukkit.broadcastMessage("§a"+source.getPseudo() + " a BANG " + target.getPseudo());	
-					BangController controller = BangController.getInstance();
-					target.actionRecu = this;
-					source.joueurAttaque = target;
-					target.sourceAction = source;
-					Player cible = controller.getPlayerServer(target);
-					Inventory action = controller.actionInventory(source, target, getNom());
-					cible.openInventory(action);
-				}
-							
-			} else {
+					evite = true;
+				} 
+			}
+			
+			
+			if (!evite) {
 				Bukkit.broadcastMessage("§a"+source.getPseudo() + " a BANG " + target.getPseudo());	
 				BangController controller = BangController.getInstance();
 				target.actionRecu = this;
@@ -91,7 +95,60 @@ public class Bang extends Carte
 				Player cible = controller.getPlayerServer(target);
 				Inventory action = controller.actionInventory(source, target, getNom());
 				cible.openInventory(action);
-			}			
+			}
+						
+		} else {
+			System.out.println("Bah en tout cas je pense que je suis ici");
+			Bukkit.broadcastMessage("§a"+source.getPseudo() + " a BANG " + target.getPseudo());	
+			BangController controller = BangController.getInstance();
+			target.actionRecu = this;
+			source.joueurAttaque = target;
+			target.sourceAction = source;
+			Player cible = controller.getPlayerServer(target);
+			Inventory action = controller.actionInventory(source, target, getNom());
+			cible.openInventory(action);
+		}
+    }
+    
+    public void slab(Joueur source, Joueur target) {
+    	if (target.aPlanque) {
+    		System.out.println("Planque");
+    	} else {
+    		System.out.println("Pas Planque");
+    		Bukkit.broadcastMessage("§a"+target.getPseudo() + " reçoit un bang de " + source.getPseudo() + " et il lui faut 2 Raté");
+			BangController controller = BangController.getInstance();
+			target.actionRecu = this;
+			source.joueurAttaque = target;
+			target.sourceAction = source;
+			Player cible = controller.getPlayerServer(target);
+			Inventory action = controller.actionInventory(source, target, getNom());
+			cible.openInventory(action);
+			BangController.getInstance().slabBang = true;
+			BangController.getInstance().consommeRate = false;
+    	}
+    }
+    
+	@Override
+	public void appliquerEffet(Joueur source, Joueur target) {
+		System.out.println("Target fin action : " + target.finAction );
+		System.out.println("Target contre action : " + target.contreAction );
+		BangController instance = BangController.getInstance();
+		System.out.println("Slab bang : " +instance.slabBang);
+		if (target.finAction == false && target.contreAction == false && !instance.slabBang) {
+			System.out.println("Bah ici je pense sinon Colin salope bis");
+			if (source.getPerso().getClass() == SlabLeFlingueur.class) {
+				System.out.println("Bang d'un slab");
+				if (target.getPerso().getClass() == Jourdonnais.class) {
+					System.out.println("c'est un jourdonnais");
+				} else {
+					slab(source,target);
+				}
+				
+			} else {
+				System.out.println("Pas slab");
+				horsSlabEffet(source, target);
+			}
+						
 		} else if (target.finAction == true && target.contreAction == false) {
 			target.bang(source);
 			target.tueur = source;

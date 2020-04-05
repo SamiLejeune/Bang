@@ -116,6 +116,18 @@ public class BangController implements CommandExecutor {
 	public Joueur duelCurrentJoueur;
 	public Joueur coupDeFoudreJoueur;
 	public boolean quitVisionVolontaire;
+	
+	//Si Slab le flingueur a bang
+	public boolean slabBang;
+	//qte de rate posée
+	public int slabContre;
+	//si le dernier raté a été posée
+	public boolean dernierSlabRate;
+	//peut consommer les rate
+	public boolean consommeRate;
+	//verif le comportement de quit du joueur
+	public boolean quitVolontaire;
+	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String arg2, String[] args) {
 		if (sender.getServer().getWorld("world").getPlayers().size() > 7) {
@@ -609,6 +621,9 @@ public class BangController implements CommandExecutor {
 		currentNbBang = 0;
 		duelCurrentJoueur = null;
 		quitVisionVolontaire = false;
+		slabBang = false;
+		slabContre = 0;
+		consommeRate = true;
 		for(Player p : this.world.getPlayers()) {
 			p.setGameMode(GameMode.ADVENTURE);
 		}
@@ -688,6 +703,8 @@ public class BangController implements CommandExecutor {
 			perso+=2;
 		}
 
+		
+		
 
 		//init pioche;
 
@@ -700,6 +717,13 @@ public class BangController implements CommandExecutor {
 		System.out.println("Init size " + this.pioche.size());
 	}
 
+	public void resetSlabAttribute() {
+		slabBang = false;
+		slabContre = 0;
+		consommeRate = true;
+		dernierSlabRate = false;
+		quitVolontaire = false;
+	}
 	
 	public ArrayList<Location> getBarriere(Location joueur) {
 		ArrayList<Location> barriere = new ArrayList<Location>();
@@ -770,7 +794,6 @@ public class BangController implements CommandExecutor {
 		ItemStack explication = new ItemStack(Material.PAPER);
 		ItemMeta explicationD = explication.getItemMeta();
 		explicationD.setDisplayName("§b"+ source.getPseudo());
-		finD.setLore(Arrays.asList("§e"+actionType));
 		explicationD.addEnchant(Enchantment.DAMAGE_ALL, 200, true);
 		explicationD.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 		explication.setItemMeta(explicationD);

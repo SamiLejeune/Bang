@@ -26,6 +26,7 @@ public class Duel extends Carte
     {
         BangController controller = BangController.getInstance();
         controller.getPlayerServer(target).openInventory(controller.actionInventory(source, target, "Duel"));
+        target.tueur = source;
     }
 
 	@Override

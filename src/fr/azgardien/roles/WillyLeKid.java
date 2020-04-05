@@ -1,5 +1,6 @@
 package fr.azgardien.roles;
 
+import fr.azgardien.bang.BangController;
 import fr.azgardien.bang.Joueur;
 
 public class WillyLeKid extends Personnage {
@@ -11,11 +12,13 @@ public class WillyLeKid extends Personnage {
 	private WillyLeKid(int vie, String nom, String description, int rangeLunette, int distance) {
 		super(vie, nom, description, rangeLunette, distance);
 		// TODO Auto-generated constructor stub
+		super.limiteBang = 10000;
 	}
 
 	@Override
 	public String touche(Joueur victime, Joueur tireur) {
 		victime.damage(1);
+		
 		return "§b" + victime.getPseudo() +" est touché, il perd un point de vie";
 	}
 

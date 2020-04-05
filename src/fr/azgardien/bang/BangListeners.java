@@ -14,6 +14,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -22,6 +23,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import fr.azgardien.cartes.Bang;
@@ -39,13 +41,16 @@ import fr.azgardien.cartes.Planque;
 import fr.azgardien.cartes.Prison;
 import fr.azgardien.cartes.Rate;
 import fr.azgardien.roles.CalamityJanet;
+import fr.azgardien.roles.SlabLeFlingueur;
 
 public class BangListeners implements Listener {
 
 	private BangController controller;
+	private JavaPlugin plugin;
 	public BangListeners(BangController controller, JavaPlugin plugin) {
 		this.controller = controller;
 		this.controller.setPlugin(plugin);
+		this.plugin = plugin;
 	}
 
 
@@ -171,22 +176,26 @@ public class BangListeners implements Listener {
 		Material type = current.getType();
 
 		if (inv.getName().equalsIgnoreCase("§8Action")) {
+			ItemStack actionSource = inv.getItem(16);
+			String nomSource = actionSource.getItemMeta().getDisplayName().substring(2);
+			ItemStack item = inv.getItem(17);
+			String actionCarte = item.getItemMeta().getDisplayName().substring(2);
 
 			if(type == Material.BARRIER) {
 				BangController.getInstance().duelPremature = true;
 				player.closeInventory();
+				
 
 			} else if (type == Material.PAPER) {
 
 			} else {
-				ItemStack actionSource = inv.getItem(16);
-				String nomSource = actionSource.getItemMeta().getDisplayName().substring(2);
+
+
 				Joueur j = BangController.getInstance().getJoueur(nomSource);
-				ItemStack item = inv.getItem(17);
-				String actionCarte = item.getItemMeta().getDisplayName().substring(2);
+
 				Carte sourceAction = instance.getType(actionCarte);
 				Carte c = instance.isGameMaterial(type);
-				
+
 				boolean correct = false;		
 				if (joueur.getPerso().getClass() == CalamityJanet.class) {
 					if (sourceAction.getClass() == Bang.class ) {
@@ -220,17 +229,48 @@ public class BangListeners implements Listener {
 						System.out.println("ici enft");
 						joueur.contreAction = true;
 						joueur.finAction = true;
-						c.appliquerEffet(null, joueur);	
-						if (sourceAction.getClass() == Bang.class) {						
-							instance.currentNbBang++;
-						}	
-						joueur.defausse(c);			
-						player.closeInventory();
-						joueur.contreAction = false;
-						joueur.finAction = false;
-						joueur.currentAction = null;
-						joueur.sourceAction = null;
-						joueur.joueurAttaque = null;
+						System.out.println("Consomme raté : " + instance.consommeRate);
+						if (instance.consommeRate == true) {
+							c.appliquerEffet(null, joueur);
+							if (sourceAction.getClass() == Bang.class) {
+								instance.currentNbBang++;
+							}
+							joueur.defausse(c);			
+							player.closeInventory();
+							joueur.contreAction = false;
+							joueur.finAction = false;
+							joueur.currentAction = null;
+							joueur.sourceAction = null;
+							joueur.joueurAttaque = null;
+						} else {
+							if (sourceAction.getClass() == Bang.class) {
+								System.out.println("Aqui ahora");
+								instance.currentNbBang++;
+							}
+							Bukkit.broadcastMessage("§b" + j.getPseudo() + " défausse un Raté..");
+							instance.quitVolontaire = true;
+							joueur.defausse(c);			
+							instance.slabContre++;
+							player.closeInventory();
+							joueur.contreAction = false;
+							joueur.finAction = false;
+							joueur.currentAction = null;
+							joueur.sourceAction = null;
+							joueur.joueurAttaque = null;
+							if (instance.dernierSlabRate == false) {
+								instance.dernierSlabRate = true;
+							}
+							if (instance.slabBang == true) {
+								//AFFICHAGE 2 FOIS	
+								Inventory action = controller.actionInventory(instance.getJoueur(nomSource), joueur, actionCarte);
+								player.openInventory(action);
+								instance.slabBang = false;	
+							}
+
+						}
+
+
+
 					}
 
 				} 
@@ -288,6 +328,7 @@ public class BangListeners implements Listener {
 							instance.currentJoueur.damage(3);
 							instance.removeDynamite(instance.currentJoueur);
 							instance.currentJoueur.aDynamite = false;
+
 						} else {
 							Bukkit.broadcastMessage("§bLa dynamite n'explose pas et passe au prochain joueur");
 							instance.removeDynamite(instance.currentJoueur);
@@ -375,7 +416,7 @@ public class BangListeners implements Listener {
 					} else if (c.getClass() == Rate.class) {
 						System.out.println("use un rate");
 						if (instance.getJoueur(player).getPerso().getClass()== (CalamityJanet.class)) {
-							if (c.getClass() == Bang.class) {
+							if (c.getClass() == Bang.class || c.getClass() == Rate.class) {
 								if (!joueur.peutTirer()) {
 									player.sendMessage("§cVous êtes limité à un seul Bang par tour");
 									event.setCancelled(true);
@@ -553,10 +594,10 @@ public class BangListeners implements Listener {
 	@EventHandler
 	public void closeInventory(InventoryCloseEvent event) {
 		if (BangController.getInstance().getPlayers() == null) return;
-		Player player = (Player) event.getPlayer();
+		final Player player = (Player) event.getPlayer();
 		Inventory inv = event.getInventory();
 		BangController instance = BangController.getInstance();
-		Joueur j = instance.getJoueur(player);
+		final Joueur j = instance.getJoueur(player);
 		if (j != null) {	
 			if (inv.getName().equals("§8Vision")){
 				if (instance.quitVisionVolontaire == false) {
@@ -598,8 +639,34 @@ public class BangListeners implements Listener {
 				instance.quitVisionVolontaire = false;
 			}
 			System.out.println("Duel fin : " + instance.duelFin);
-			if (instance.duelFin == true) {
-				if (inv.getName().equalsIgnoreCase("§8Action") && !j.finAction) {
+			if (instance.duelFin == true) {	
+				System.out.println("Joueur fin action : " + j.finAction + " instance slab bang " + instance.slabBang + " dernier slab " + instance.dernierSlabRate + " quit volontaire " + instance.quitVolontaire);
+				if (inv.getName().equalsIgnoreCase("§8Action") && (instance.slabBang == true || instance.dernierSlabRate == true)) {
+					System.out.println("Clara la best");
+					System.out.println("Bah ici je pense sinon Colin la plus grosse salope du monde entier sa mere");
+					if (instance.quitVolontaire == false) {
+					//	Bukkit.broadcastMessage("§b" + j.getPseudo() + " a quitté et se prend le bang!");
+						j.finAction = true;
+						j.contreAction = false;
+						j.contreAction = false;
+						j.finAction = false;
+						j.currentAction = null;
+						j.sourceAction = null;
+						j.joueurAttaque = null;
+						j.getPerso().limiteBang = 1;
+						j.bang(j.sourceAction);
+						instance.resetSlabAttribute();
+					} else if (j.finAction) {
+						if (instance.slabBang == false) {
+							System.out.println("Ici c'est fini on compare");
+							System.out.println("il prend pas tarif");
+							Bukkit.broadcastMessage("§a"+ j.getPseudo() + " a réussi à contrer slab le flingueur");
+							instance.resetSlabAttribute();
+						} 
+					}				
+					instance.quitVolontaire = false;
+				} else if (inv.getName().equalsIgnoreCase("§8Action") && !j.finAction) {
+					System.out.println("Bah ici je pense sinon Colin la plus grosse salope");
 					j.finAction = true;
 					j.contreAction = false;
 					j.actionRecu.appliquerEffet(j.sourceAction, j);
@@ -609,8 +676,8 @@ public class BangListeners implements Listener {
 					j.sourceAction = null;
 					j.joueurAttaque = null;
 					j.getPerso().limiteBang = 1;
-				}
-				if (instance.currentMagasin != null) {
+					instance.quitVolontaire = false;
+				} else if (instance.currentMagasin != null) {
 					if (inv.getName().equalsIgnoreCase("§8Magasin") && j.choixMagasin == false) {
 						try {
 							Carte random = instance.randomCarteMagasin();
@@ -632,7 +699,7 @@ public class BangListeners implements Listener {
 						}
 
 					}
-				}
+				} 
 
 			} else {
 				if (inv.getName().equals("§8Action")) {
@@ -698,5 +765,9 @@ public class BangListeners implements Listener {
 		}
 
 	}
+
+
+
+
 
 }
