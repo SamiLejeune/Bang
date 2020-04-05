@@ -16,6 +16,7 @@ import fr.azgardien.bang.Joueur;
 import fr.azgardien.roles.ElGringo;
 import fr.azgardien.roles.Jourdonnais;
 import fr.azgardien.roles.SlabLeFlingueur;
+import fr.azgardien.roles.SuzyLafayette;
 
 public class Bang extends Carte 
 {
@@ -215,6 +216,12 @@ public class Bang extends Carte
 				Carte carte = source.getRandomFromMain();
 				target.pioche(carte);
 				player.sendMessage("§dVous récupérez : " + carte.getNom() + " ["+carte.getVal() + " de " + carte.getCouleur() + "]" );
+				if (source.getPerso().getClass() == SuzyLafayette.class) {
+					if (source.getMains().size() == 0) {
+						Bukkit.broadcastMessage("§6Suzy Lafayette active sa capacité, elle n'a plus de carte donc elle pioche une carte");
+						source.pioche(instance.getCarte());
+					}
+				}
 			}
 		} else {
 			Bukkit.broadcastMessage("§a"+ target.getPseudo() + " défausse un BANG et ne perd pas de point de vie");

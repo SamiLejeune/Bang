@@ -44,6 +44,7 @@ import fr.azgardien.cartes.Gatling;
 import fr.azgardien.cartes.Indiens;
 import fr.azgardien.roles.CalamityJanet;
 import fr.azgardien.roles.SlabLeFlingueur;
+import fr.azgardien.roles.SuzyLafayette;
 
 public class BangListeners implements Listener {
 
@@ -560,11 +561,25 @@ public class BangListeners implements Listener {
 				Carte carte = joueur.joueurBraque.getRandomFromMain();
 				joueur.pioche(carte);
 				player.sendMessage("§dVous récupérez : " + carte.getNom() + " ["+carte.getVal() + " de " + carte.getCouleur() + "]" );
+				if (instance.coupDeFoudreJoueur.getPerso().getClass() == SuzyLafayette.class) {
+					System.out.println("Braqué suzy");
+					if (instance.coupDeFoudreJoueur.getMains().size() == 0) {
+						Bukkit.broadcastMessage("§6Suzy Lafayette active sa capacité, elle n'a plus de carte donc elle pioche une carte");
+						instance.coupDeFoudreJoueur.pioche(instance.getCarte());
+					}
+				}
 				instance.coupDeFoudreJoueur = null;
 			} else {
 				Carte carte = joueur.joueurBraque.getFromPose(type);
 				joueur.pioche(carte);
 				joueur.joueurBraque.updateRemoveTargettable(carte);
+				if (instance.coupDeFoudreJoueur.getPerso().getClass() == SuzyLafayette.class) {
+					System.out.println("Braqué suzy");
+					if (instance.coupDeFoudreJoueur.getMains().size() == 0) {
+						Bukkit.broadcastMessage("§6Suzy Lafayette active sa capacité, elle n'a plus de carte donc elle pioche une carte");
+						instance.coupDeFoudreJoueur.pioche(instance.getCarte());
+					}
+				}
 				player.sendMessage("§dVous récupérez : " + carte.getNom() + " ["+carte.getVal() + " de " + carte.getCouleur() + "]" );
 				instance.coupDeFoudreJoueur = null;
 
@@ -585,12 +600,26 @@ public class BangListeners implements Listener {
 				Carte carte = joueur.joueurBraque.getRandomFromMain();
 				Bukkit.broadcastMessage("§b"+joueur.joueurBraque.getPseudo() + " perd " + carte.getNom() );
 				instance.defausse(carte);
+				if (instance.coupDeFoudreJoueur.getPerso().getClass() == SuzyLafayette.class) {
+					System.out.println("Braqué suzy");
+					if (instance.coupDeFoudreJoueur.getMains().size() == 0) {
+						Bukkit.broadcastMessage("§6Suzy Lafayette active sa capacité, elle n'a plus de carte donc elle pioche une carte");
+						instance.coupDeFoudreJoueur.pioche(instance.getCarte());
+					}
+				}
 				instance.coupDeFoudreJoueur = null;
 			} else {
 				Carte carte = joueur.joueurBraque.getFromPose(type);
 				joueur.joueurBraque.updateRemoveTargettable(carte);
 				Bukkit.broadcastMessage("§b"+joueur.joueurBraque.getPseudo() + " perd " + carte.getNom() );
 				instance.defausse(carte);
+				if (instance.coupDeFoudreJoueur.getPerso().getClass() == SuzyLafayette.class) {
+					System.out.println("Braqué suzy");
+					if (instance.coupDeFoudreJoueur.getMains().size() == 0) {
+						Bukkit.broadcastMessage("§6Suzy Lafayette active sa capacité, elle n'a plus de carte donc elle pioche une carte");
+						instance.coupDeFoudreJoueur.pioche(instance.getCarte());
+					}
+				}
 				instance.coupDeFoudreJoueur = null;
 			}
 
@@ -623,11 +652,21 @@ public class BangListeners implements Listener {
 						instance.coupDeFoudreJoueur.getFromPose(random.representation().getType());
 					}
 					instance.currentJoueur.joueurBraque.updateRemoveTargettable(random);
+					if (instance.coupDeFoudreJoueur.getPerso().getClass() == SuzyLafayette.class) {
+						System.out.println("Braqué suzy");
+						if (instance.coupDeFoudreJoueur.getMains().size() == 0) {
+							Bukkit.broadcastMessage("§6Suzy Lafayette active sa capacité, elle n'a plus de carte donc elle pioche une carte");
+							instance.coupDeFoudreJoueur.pioche(instance.getCarte());
+						}
+					}
 					Bukkit.broadcastMessage("§b"+instance.currentJoueur.joueurBraque.getPseudo() + " perd " + random.getNom() );
 					instance.defausse(random);
 					instance.coupDeFoudreJoueur = null;
 					CoupDeFoudre foudre = new CoupDeFoudre("", Couleur.Carreau);
 					instance.currentJoueur.getFromMain(foudre.representation().getType());
+					if (instance.currentJoueur.getPerso().getClass() == SuzyLafayette.class) {
+						System.out.println("Coup de foudre suzy");
+					}
 					instance.currentJoueur.joueurBraque = null;
 					player.closeInventory();
 
@@ -643,9 +682,17 @@ public class BangListeners implements Listener {
 					}
 					instance.currentJoueur.pioche(random);
 					instance.currentJoueur.joueurBraque.updateRemoveTargettable(random);
+					if (instance.coupDeFoudreJoueur.getPerso().getClass() == SuzyLafayette.class) {
+						System.out.println("Braqué suzy");
+						if (instance.coupDeFoudreJoueur.getMains().size() == 0) {
+							Bukkit.broadcastMessage("§6Suzy Lafayette active sa capacité, elle n'a plus de carte donc elle pioche une carte");
+							instance.coupDeFoudreJoueur.pioche(instance.getCarte());
+						}
+					}
 					instance.coupDeFoudreJoueur = null;
 					Braquage braquage = new Braquage("", Couleur.Carreau);
 					instance.currentJoueur.getFromMain(braquage.representation().getType());
+					
 					instance.currentJoueur.joueurBraque = null;
 					player.sendMessage("§dVous récupérez : " + random.getNom() + " ["+random.getVal() + " de " + random.getCouleur() + "]" );
 					player.closeInventory();
