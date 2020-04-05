@@ -128,7 +128,9 @@ public class BangController implements CommandExecutor {
 	public boolean consommeRate;
 	//verif le comportement de quit du joueur
 	public boolean quitVolontaire;
+	public Joueur kitCarlson;
 	
+	public ArrayList<Carte> kitChoix;
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String arg2, String[] args) {
 		if (sender.getServer().getWorld("world").getPlayers().size() > 7) {
@@ -139,6 +141,41 @@ public class BangController implements CommandExecutor {
 
 		if (sender instanceof Player) {
 			Player p = (Player) sender;
+			
+			if(cmd.getName().equalsIgnoreCase("carlson")) {
+				
+				if (getPlayers() == null) return false;
+				if (getJoueur(p) != kitCarlson) return false;
+				if (args.length == 0 || args.length > 1) {
+					p.sendMessage("§c Il faut un argument (/carlson 1 ou /carlson 2 ou /carlson 3)");
+					return false;
+				}
+				
+				try {
+					int c = Integer.parseInt(args[0]);
+				
+					if (c == 1 || c ==2 || c == 3) {
+						Carte carte = kitChoix.get(c-1);
+						kitChoix.remove(c-1);
+						pioche.add(0, carte);
+					} else {
+						p.sendMessage("§c Il faut un argument de type 1 ou 2 ou 3");
+						return false;
+					}
+				} catch(NumberFormatException e) {
+					p.sendMessage("§c L'argument doit être un chiffre");
+				}
+				
+				p.closeInventory();
+				for (Carte c : kitChoix) {
+					kitCarlson.pioche(c);
+				}
+				p.openInventory(playerInventory(kitCarlson));
+				kitCarlson = null;
+				kitChoix = null;
+				
+			}
+			
 			if (cmd.getName().equalsIgnoreCase("start")) {
 				Bukkit.broadcastMessage("§eLa partie débute ! ");	
 				BukkitTask task = new MortTask().runTaskTimer(plugin, 10, 20);
@@ -300,6 +337,16 @@ public class BangController implements CommandExecutor {
 
 
 
+	}
+	
+	
+	public Joueur getJoueurFromPerso(Personnage p) {
+		for (Joueur j : this.players) {
+			if (j.getPerso() == p) {
+				return j;
+			}
+		}
+		return null;
 	}
 
 	public void resetScoreBoard() {

@@ -10,3 +10,5 @@ commands:
     description: Choix du personnage
   personnages:
     description: Connaitre les personnages des joueurs
+  carlson :
+    description: Choix de la carte a remettre dans la pioche quand on est Kit Carlson

@@ -8,6 +8,7 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.command.defaults.KickCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -23,6 +24,7 @@ import fr.azgardien.cartes.Remington;
 import fr.azgardien.cartes.Schofield;
 import fr.azgardien.cartes.Volcanic;
 import fr.azgardien.cartes.Winchester;
+import fr.azgardien.roles.KitCarlson;
 import fr.azgardien.roles.Personnage;
 import fr.azgardien.roles.WillyLeKid;
 

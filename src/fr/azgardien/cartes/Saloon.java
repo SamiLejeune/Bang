@@ -1,5 +1,7 @@
 package fr.azgardien.cartes;
 
+import java.util.Arrays;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -48,6 +50,7 @@ public class Saloon extends Carte
 		ItemMeta itemD = item.getItemMeta();
 		itemD.setDisplayName("§6Saloon");
 		itemD.addEnchant(Enchantment.DAMAGE_ALL, 200, true);
+		itemD.setLore(Arrays.asList("§bValeur :§9 " + getVal(), "§bCouleur :§9 " + getCouleur()));
 		itemD.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 		item.setItemMeta(itemD);
 		return item;

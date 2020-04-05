@@ -14,6 +14,7 @@ public class Main extends JavaPlugin {
 		getCommand("start").setExecutor(controller);
 		getCommand("choix").setExecutor(controller);
 		getCommand("personnages").setExecutor(controller);
+		getCommand("carlson").setExecutor(controller);
 		getServer().getPluginManager().registerEvents(new BangListeners(controller,this), this);
 		super.onEnable();
 	}

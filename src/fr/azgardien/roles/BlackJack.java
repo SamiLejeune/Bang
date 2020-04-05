@@ -51,15 +51,15 @@ public class BlackJack extends Personnage {
 	}
 	
 	public ArrayList<Carte> piocheTour() {
-		Bukkit.broadcastMessage("§6 Black Jack pioche comme c'est son tour");
+		Bukkit.broadcastMessage("§6Black Jack pioche comme c'est son tour");
 		ArrayList<Carte> pioche = new ArrayList<Carte>();
 		Carte c1 = BangController.getInstance().getCarte();
 		pioche.add(c1);
 		Carte c2  = BangController.getInstance().getCarte();
 		pioche.add(c2);
-		Bukkit.broadcastMessage("§6 Il tire : " + c2.getNom() + " ["+c2.getVal() + " de " + c2.getCouleur() + "]");
+		Bukkit.broadcastMessage("§6Il tire : " + c2.getNom() + " ["+c2.getVal() + " de " + c2.getCouleur() + "]");
 		if(c2.getCouleur() == Couleur.Coeur || c2.getCouleur() == Couleur.Carreau) {
-			Bukkit.broadcastMessage("§6 Il pioche une carte supplémentaire");
+			Bukkit.broadcastMessage("§6Il pioche une carte supplémentaire");
 			Carte c3  = BangController.getInstance().getCarte();
 			pioche.add(c3);
 		}
